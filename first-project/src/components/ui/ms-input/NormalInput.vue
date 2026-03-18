@@ -14,6 +14,7 @@ const value = defineModel<string>({
       :placeholder="props.placeholder"
       v-model="value"
       :aria-label="props.label"
+      error-messages="string"
   ></v-text-field>
 </template>
 

@@ -3,7 +3,7 @@
 </script>
 
 <template>
-  schedule
+hiring posts
 </template>
 
 <style scoped>

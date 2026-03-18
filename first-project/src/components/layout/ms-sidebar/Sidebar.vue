@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type {SidebarItems} from "@/components/layout/ms-sidebar/model.ts";
+import CustomButton from "@/components/ui/ms-button/CustomButton.vue";
 
 const sidebarItems: SidebarItems[] = [
   {
@@ -64,6 +65,19 @@ const sidebarItems: SidebarItems[] = [
           <div class="sidebar_menu_item_text">{{ component.text }}</div>
         </div>
       </div>
+
+      <CustomButton
+          style="border-style: solid; border-width: 1px;"
+          prepend-icon="$prev"
+          spaced="start"
+          label="Thu gọn"
+          variant="outlined"
+          :is-loading="false"
+          type="button"
+          class-name="sidebar_toggle_text"
+          height="50"
+          width="200"
+      />
     </div>
   </div>
 </template>

@@ -3,7 +3,7 @@
 </script>
 
 <template>
-  schedule
+conversation
 </template>
 
 <style scoped>
