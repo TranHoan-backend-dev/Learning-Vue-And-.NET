@@ -1,7 +1,12 @@
 <script setup lang="ts">
-import type {ButtonProps} from "@/components/ui/ms-button/model.ts";
 
-const props = defineProps<ButtonProps>()
+const props = defineProps<{
+  label?: string,
+  className?: string,
+  variant?: 'outlined' | 'tonal' | 'text' | 'plain' | 'flat',
+  density?: 'compact' | 'comfortable' | 'default',
+  size?: 'x-small' | 'small' | 'large' | 'x-large',
+}>()
 const emit = defineEmits(['click'])
 </script>
 
@@ -19,6 +24,13 @@ const emit = defineEmits(['click'])
   </v-btn>
 </template>
 
-<style scoped src="./style.css">
+<style scoped>
+:deep(.v-btn__content) {
+  justify-content: center;
+}
 
+:deep(.v-btn__prepend) {
+  position: absolute;
+  left: 12px;
+}
 </style>

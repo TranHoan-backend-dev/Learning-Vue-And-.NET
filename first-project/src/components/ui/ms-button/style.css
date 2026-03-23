@@ -1,8 +1,0 @@
-:deep(.v-btn__content) {
-    justify-content: center;
-}
-
-:deep(.v-btn__prepend) {
-    position: absolute;
-    left: 12px;
-}

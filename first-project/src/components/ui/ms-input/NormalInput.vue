@@ -1,7 +1,11 @@
 <script setup lang="ts">
-import type {InputProps} from "@/components/ui/ms-input/model.ts";
 
-const props = defineProps<InputProps>()
+const props = defineProps<{
+  label?: string,
+  placeholder: string,
+  className?: string,
+  type?: 'text' | 'tel' | 'checkbox',
+}>()
 
 const value = defineModel<string>({
   default: ''
@@ -15,9 +19,12 @@ const value = defineModel<string>({
       v-model="value"
       :aria-label="props.label"
       error-messages="string"
+      :type="props.type ?? 'text'"
   ></v-text-field>
 </template>
 
-<style scoped src="./style.css">
-
+<style scoped>
+:deep(.v-field) {
+  border-radius: 10px;
+}
 </style>

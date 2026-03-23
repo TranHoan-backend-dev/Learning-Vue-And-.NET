@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import {computed} from "vue";
-import type {InputProps} from "@/components/ui/ms-input/model.ts";
 
-const props = defineProps<InputProps>()
+const props = defineProps<{
+  label?: string,
+  placeholder: string,
+  className?: string,
+}>()
 
 const message = defineModel<string>({
   default: ''
@@ -30,6 +33,8 @@ const mergedPlaceholder = computed(() => {
   ></v-text-field>
 </template>
 
-<style scoped src="./style.css">
-
+<style scoped>
+:deep(.v-field) {
+  border-radius: 10px;
+}
 </style>

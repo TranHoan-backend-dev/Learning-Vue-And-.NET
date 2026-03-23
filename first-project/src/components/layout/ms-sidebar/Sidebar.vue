@@ -79,7 +79,6 @@ const sidebarItems: SidebarItems[] = [
         <CustomButton
             v-for="(component, index) in sidebarItems"
             class="sidebar_menu_item"
-            active-class="sidebar_menu_item_active"
             :key="index"
             :to="component.to"
             variant="text"
