@@ -1,4 +1,4 @@
-import randomUuid from "@/utils/utils"
+import randomUuid from "@/utils/uuid.ts";
 
 /**
  * Dữ liệu ban đầu của trang candidate

@@ -8,6 +8,7 @@ import {data as candidateData} from "@/assets/data/data";
 import {computed, ref} from "vue";
 import CandidateAddEditForm from "@/views/ms-candidate/CandidateAddEditForm.vue";
 import CandidateViewModal from "@/views/ms-candidate/CandidateViewModal.vue";
+import {usePagination} from "@/views/ms-candidate/usePagination.ts"
 
 const components = [
   {iconClassName: "content_body_header_right_filter_icon"},
@@ -15,13 +16,25 @@ const components = [
   {iconClassName: "content_body_header_right_samset_icon"},
   {iconClassName: "sidebar_menu_item_setting_icon"},
 ]
-const filteredData = [...candidateData];
+const filteredData = ref([...candidateData]);
+
+const {
+  currentPage,
+  pageSize,
+  totalRecords,
+  totalPages,
+  paginatedData,
+  pageInfo,
+  handlePageSizeChange,
+  handleNextPage,
+  handlePrevPage
+} = usePagination(filteredData);
 
 const tableData = computed(() => {
-  return filteredData.map((candidate: any, index: number) =>
+  return paginatedData.value.map((candidate: any, index: number) =>
       [
         {tdClassName: 'col_checkbox text_center', slotName: 'checkbox'},
-        {tdClassName: 'col_name text_center', value: (index + 1).toString()},
+        {tdClassName: 'col_name text_center', value: ((currentPage.value - 1) * pageSize.value + index + 1).toString()},
         {tdClassName: 'col_name text_left', value: candidate.name || "--"},
         {tdClassName: 'col_phone text_right', value: candidate.phone || "--"},
         {tdClassName: 'col_email text_left', value: candidate.email || "--"},
@@ -57,23 +70,34 @@ const handleOpenAddingModal = () => {
 }
 
 const handleOpenEditModal = (id: string) => {
-  currentCandidate.value = filteredData.find(c => c.id === id) || null
+  currentCandidate.value = filteredData.value.find(c => c.id === id) || null
   modalMode.value = 'edit'
   isModalOpen.value = true
 }
 
 const handleOpenViewModal = (id: string) => {
-  currentCandidate.value = candidateData.find(c => c.id === id) || null
+  currentCandidate.value = filteredData.value.find(c => c.id === id) || null
+  console.log(currentCandidate.value)
   modalMode.value = 'view'
   isModalOpen.value = true
 }
 
+// <editor-fold> desc="handle deleting"
 const handleOpenDeleteModal = (id: string) => {
-  currentCandidate.value = candidateData.find(c => c.id === id) || null
+  currentCandidate.value = filteredData.value.find(c => c.id === id) || null
   console.log(currentCandidate)
   modalMode.value = 'delete'
   isModalOpen.value = true
 }
+
+const confirmDeleting = () => {
+  console.log('confirm deleting');
+  if (currentCandidate.value) {
+    filteredData.value = filteredData.value.filter(c => c.id !== currentCandidate.value.id)
+  }
+  isModalOpen.value = false
+}
+// </editor-fold>
 </script>
 
 <template>
@@ -181,6 +205,39 @@ const handleOpenDeleteModal = (id: string) => {
             </CustomTable>
           </div>
         </div>
+        <div class="content_body_footer">
+          <!-- Tổng bản ghi và Số bản ghi trên trang -->
+          <div class="content_body_footer_left">
+            <div class="content_body_footer_total">
+              Tổng: <strong id="totalRecords">{{ totalRecords }}</strong> bản ghi
+            </div>
+          </div>
+
+          <!-- Phân trang và điều hướng -->
+          <div class="content_body_footer_right">
+            <div class="content_body_footer_pagesize">
+              <span class="paging_label">Số bản ghi trên trang</span>
+              <select id="pageSizeSelect" class="page_size_select" v-model="pageSize" @change="handlePageSizeChange">
+                <option :value="5">5</option>
+                <option :value="10">10</option>
+                <option :value="15">15</option>
+                <option :value="25">25</option>
+                <option :value="50">50</option>
+              </select>
+            </div>
+            <div class="content_body_footer_info">
+              <span class="page_info" id="pageInfo">{{ pageInfo }}</span>
+            </div>
+            <div class="content_body_footer_nav">
+              <button type="button" class="btn_page" id="btnPrevPage" title="Trang trước" @click="handlePrevPage" :disabled="currentPage <= 1">
+                <div class="icon_prev"></div>
+              </button>
+              <button type="button" class="btn_page" id="btnNextPage" title="Trang sau" @click="handleNextPage" :disabled="currentPage >= totalPages">
+                <div class="icon_next"></div>
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -227,7 +284,7 @@ const handleOpenDeleteModal = (id: string) => {
         </v-card-text>
         <v-card-actions class="pa-6 pt-0 justify-end">
           <CustomButton size="large" type="button" class="btn__cancel" @click="isModalOpen = false">Không</CustomButton>
-          <CustomButton size="large" type="button" class="btn__delete" @click="isModalOpen = false" color="error">Xóa
+          <CustomButton size="large" type="button" class="btn__delete" @click="confirmDeleting" color="error">Xóa
           </CustomButton>
         </v-card-actions>
       </v-card>
