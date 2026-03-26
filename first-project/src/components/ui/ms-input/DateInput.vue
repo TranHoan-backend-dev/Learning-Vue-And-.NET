@@ -1,15 +1,17 @@
 <script setup lang="ts">
 import NormalInput from "@/components/ui/ms-input/NormalInput.vue";
 
-interface DateInputProps {
+const model = defineModel<string>()
+
+defineProps<{
   className?: string,
   errorMessage?: string,
-}
-const props = defineProps<DateInputProps>()
+}>()
 </script>
 
 <template>
   <NormalInput
+      v-model="model"
       type="date"
       append-inner-icon="mdi-calendar-month-outline"
       hide-details

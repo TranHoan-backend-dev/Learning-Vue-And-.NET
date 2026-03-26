@@ -21,5 +21,8 @@ export const validateFullName = (fullName: string) => {
 }
 
 export const validateEmail = (email: string) => {
-
-}
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!regex.test(email)) {
+        throw new Error("Email không đúng định dạng");
+    }
+}

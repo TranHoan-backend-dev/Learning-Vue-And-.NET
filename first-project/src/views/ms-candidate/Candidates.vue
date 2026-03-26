@@ -54,9 +54,17 @@ const modalMode = ref<'add' | 'view' | 'edit' | 'delete'>('add')
 const currentCandidate = ref<any>(null)
 
 const saveCandidate = (data: any) => {
-  console.log('Saving candidate:', data);
   // Implementation for saving/updating goes here
   isModalOpen.value = false;
+  if (modalMode.value === "add") {
+    console.log('Saving candidate:', data);
+    filteredData.value.push({...data, id: Date.now().toString()})
+  } else if (modalMode.value === "edit") {
+    const index = filteredData.value.findIndex(c => c.id === data.id);
+    if (index > -1) {
+      filteredData.value[index] = {...data}
+    }
+  }
 }
 
 const handleDeleteMany = () => {
@@ -230,10 +238,12 @@ const confirmDeleting = () => {
               <span class="page_info" id="pageInfo">{{ pageInfo }}</span>
             </div>
             <div class="content_body_footer_nav">
-              <button type="button" class="btn_page" id="btnPrevPage" title="Trang trước" @click="handlePrevPage" :disabled="currentPage <= 1">
+              <button type="button" class="btn_page" id="btnPrevPage" title="Trang trước" @click="handlePrevPage"
+                      :disabled="currentPage <= 1">
                 <div class="icon_prev"></div>
               </button>
-              <button type="button" class="btn_page" id="btnNextPage" title="Trang sau" @click="handleNextPage" :disabled="currentPage >= totalPages">
+              <button type="button" class="btn_page" id="btnNextPage" title="Trang sau" @click="handleNextPage"
+                      :disabled="currentPage >= totalPages">
                 <div class="icon_next"></div>
               </button>
             </div>

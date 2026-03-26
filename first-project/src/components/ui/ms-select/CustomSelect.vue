@@ -6,16 +6,16 @@ interface Option {
 
 interface SelectProps {
   label?: string,
-  modelValue?: string,
+  modelValue?: any,
   options: Option[],
-  required?: boolean
+  required?: boolean,
+  errorMessage?: string
 }
 
-defineProps<SelectProps>();
+const props = defineProps<SelectProps>();
 
 const emit = defineEmits<{
-  // phat 1 su kien co ten la 'update:modelValue', gia tri truyen vao la value, va khong nhan ve gia tri nao
-  (e: 'update:modelValue', value: string): void
+  (e: 'update:modelValue', value: any): void
 }>()
 </script>
 
@@ -29,6 +29,7 @@ const emit = defineEmits<{
         :value="modelValue"
         @change="emit('update:modelValue', ($event.target as HTMLSelectElement).value)"
         class="ms-select"
+        :class="{'ms-select-error': errorMessage}"
     >
       <option
           v-for="(option, key) in options"
@@ -38,6 +39,9 @@ const emit = defineEmits<{
         {{ option.label }}
       </option>
     </select>
+    <div v-if="errorMessage" class="ms_error_message">
+      {{ errorMessage }}
+    </div>
   </div>
 </template>
 
@@ -76,5 +80,16 @@ const emit = defineEmits<{
 
 .ms-select:focus {
     border-color: #2970f6;
+}
+
+.ms-select-error {
+    border-color: #ff4d4f !important;
+}
+
+.ms_error_message {
+    font-size: 12px;
+    color: #ff4d4f;
+    margin-top: 4px;
+    min-height: 16px;
 }
 </style>
