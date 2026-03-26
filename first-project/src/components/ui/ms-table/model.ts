@@ -8,6 +8,6 @@ export interface BodyProps {
     tdClassName?: string,
     value?: any,
     slotName?: string,
-    id?: string,
+    id?: any,
     [key: string]: any;
 }
