@@ -1,3 +1,89 @@
 **/node_modules/
 **/.idea/
 **/.vscode/
+dist/
+.nuxt/
+.output/
+.cache/
+.temp/
+.eslintcache
+*.tsbuildinfo
+
+# Vite
+vite.config.ts.timestamp-*
+vite.config.js.timestamp-*
+
+# Coverage
+coverage/
+
+# =========================
+# .NET / C#
+# =========================
+bin/
+obj/
+out/
+TestResults/
+
+# Rider / ReSharper
+_ReSharper*/
+*.DotSettings.user
+
+# User-specific files
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build results
+*.dll
+*.exe
+*.pdb
+*.cache
+*.mdb
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+!**/packages/build/
+.nuget/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# Publish output
+publish/
+wwwroot/lib/
+
+# EF Core
+*.dbmdl
+
+# IIS Express
+.vs/
+iisexpress/
+
+# =========================
+# Generated files
+# =========================
+*.generated.cs
+*.g.cs
+*.g.i.cs
+
+# =========================
+# Temporary files
+# =========================
+tmp/
+temp/
+*.tmp
+
+# =========================
+# Optional uploads / local storage
+# =========================
+uploads/
+storage/
+**.env
+**.vs/
