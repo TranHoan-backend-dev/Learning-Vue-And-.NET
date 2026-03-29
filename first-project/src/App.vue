@@ -9,6 +9,7 @@
         </div>
       </div>
     </v-main>
+    <CustomToast/>
   </v-app>
 </template>
 
@@ -16,6 +17,7 @@
 import Header from '@/components/layout/ms-header/Header.vue'
 import {ref} from "vue";
 import Sidebar from "@/components/layout/ms-sidebar/Sidebar.vue";
+import CustomToast from "@/components/ui/ms-toast/CustomToast.vue";
 
 const isCollapsed = ref(false);
 </script>

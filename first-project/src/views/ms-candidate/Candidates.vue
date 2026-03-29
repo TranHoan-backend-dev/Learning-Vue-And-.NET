@@ -10,6 +10,9 @@ import CandidateAddEditForm from "@/views/ms-candidate/add-edit-form/CandidateAd
 import CandidateViewModal from "@/views/ms-candidate/CandidateViewModal.vue";
 import {usePagination} from "@/views/ms-candidate/usePagination.ts"
 import type {BodyProps} from "@/components/ui/ms-table/model.ts";
+import {toast} from "@/services/toast.ts";
+
+toast.info('Dang nhap thanh cong', 'Chao mung den voi trang tuyen dung')
 
 const components = [
   {iconClassName: "content_body_header_right_filter_icon"},
@@ -55,7 +58,8 @@ const modalMode = ref<'add' | 'view' | 'edit' | 'delete'>('add')
 const currentCandidate = ref<any>(null)
 const selectedCandidateIds = ref<string[]>([]);
 
-// editor-fold> desc="delete many"
+// <editor-fold> desc="delete many"
+
 // lay toan bo cac id dang co trong trang
 const currentPageIds = computed(() =>
     paginatedData.value.map((candidate: any) => candidate.id)
@@ -149,14 +153,21 @@ const handleOpenDeleteModal = (id: string) => {
 
 const confirmDeleting = () => {
   console.log('confirm deleting');
+  let title = 'Xóa thành công';
+  let message = 'Xóa ứng viên thành công';
+
   if (currentCandidate.value) {
+    message = `Xóa ứng viên ${currentCandidate.value.name} thành công`;
     filteredData.value = filteredData.value.filter(c => c.id !== currentCandidate.value.id)
   } else if (selectedCandidateIds.value.length > 0) {
+    message = `Xóa ${selectedCandidateIds.value.length} ứng viên thành công`;
     filteredData.value = filteredData.value.filter(
         c => !selectedCandidateIds.value.includes(c.id)
     )
     selectedCandidateIds.value = []
   }
+
+  toast.success(title, message)
   currentCandidate.value = null;
   isModalOpen.value = false
 }
@@ -176,6 +187,8 @@ const confirmDeleting = () => {
             class-name="content_header_right_btn_delete"
             :disabled="!hasSelectedRows"
             @click="handleDeleteMany"
+            tooltip-location="bottom"
+            tooltip-content="Xóa"
         >
           <div class="mi_icon_delete_user"></div>
           Xóa
@@ -187,6 +200,8 @@ const confirmDeleting = () => {
             class-name="content_header_right_btn_delete"
             style="background-color: var(--border-control-hover)"
             @click="handleOpenAddingModal"
+            tooltip-location="bottom"
+            tooltip-content="Thêm ứng viên"
         >
           <div class="content_header_action_add_icon_left"></div>
           <div class="content_header_action_add_icon_text">Thêm ứng viên</div>

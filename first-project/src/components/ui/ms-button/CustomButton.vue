@@ -6,6 +6,8 @@ const props = defineProps<{
   variant?: 'outlined' | 'tonal' | 'text' | 'plain' | 'flat',
   density?: 'compact' | 'comfortable' | 'default',
   size?: 'x-small' | 'small' | 'large' | 'x-large',
+  tooltipLocation?: string,
+  tooltipContent?: string
 }>()
 const emit = defineEmits(['click'])
 </script>
@@ -21,6 +23,7 @@ const emit = defineEmits(['click'])
   >
     {{ props.label }}
     <slot/>
+    <v-tooltip v-if="tooltipLocation && tooltipContent" activator="parent" :location="tooltipLocation">{{props.tooltipContent}}</v-tooltip>
   </v-btn>
 </template>
 

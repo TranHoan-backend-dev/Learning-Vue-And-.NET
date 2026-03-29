@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import {ref} from "vue";
 import type {SidebarItems} from "@/components/layout/ms-sidebar/model.ts";
 import CustomButton from "@/components/ui/ms-button/CustomButton.vue";
 
-const props = defineProps({
+defineProps({
   isCollapsed: Boolean
 })
 const emit = defineEmits(['toggle'])
@@ -89,15 +88,11 @@ const sidebarItems: SidebarItems[] = [
               marginLeft: isCollapsed ? '5px' : '12px',
               justifyContent: isCollapsed ? 'center' : 'left'
             }"
+            tooltip-location="right"
+            :tooltip-content="component.text"
         >
           <div :class="component.iconClassName"></div>
           <div class="sidebar_menu_item_text">{{ component.text }}</div>
-          <v-tooltip
-              activator="parent"
-              location="right"
-          >
-            {{ component.text }}
-          </v-tooltip>
         </CustomButton>
       </div>
 
@@ -112,6 +107,8 @@ const sidebarItems: SidebarItems[] = [
           :is-loading="false"
           variant="outlined"
           style="color: white; border-color: #dee2e6;"
+          tooltip-location="right"
+          tooltip-content="Thu gọn"
       />
     </div>
   </div>
