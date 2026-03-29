@@ -16,7 +16,7 @@ let id = 0
 const push = (
     title: string,
     text: string,
-    color: ToastType = 'info',
+    color: ToastType,
     timeout: number
 ) => {
     snackbars.value.push({

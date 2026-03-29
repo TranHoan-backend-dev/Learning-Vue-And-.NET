@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {toast} from "@/services/toast.ts";
-import {computed, shallowRef} from "vue";
+import {computed} from "vue";
 
 const currentToast = computed(() => toast.snackbars.value[0] ?? null)
 
@@ -19,7 +19,6 @@ const getIcon = (color: string) => {
   }
 }
 
-const collapsed = shallowRef(false)
 </script>
 
 <template>
@@ -37,7 +36,15 @@ const collapsed = shallowRef(false)
       :prepend-icon="getIcon(currentToast?.color || 'info')"
       closable
       :total-visible="3"
-  />
+  >
+    <template #actions="{ props }">
+      <v-btn
+          v-bind="props"
+          variant="text"
+          icon="mdi-close-circle"
+      />
+    </template>
+  </v-snackbar-queue>
 </template>
 
 <style scoped>

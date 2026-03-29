@@ -115,11 +115,13 @@ const saveCandidate = (data: any) => {
   if (modalMode.value === "add") {
     console.log('Saving candidate:', data);
     filteredData.value.push({...data, id: Date.now().toString()})
+    toast.success('Them thanh cong', `Them ung vien ${data.name} thanh cong`)
   } else if (modalMode.value === "edit") {
     const index = filteredData.value.findIndex(c => c.id === data.id);
     if (index > -1) {
       filteredData.value[index] = {...data}
     }
+    toast.success('Sua thanh cong', `Sua ung vien ${data.name} thanh cong`)
   }
 }
 
