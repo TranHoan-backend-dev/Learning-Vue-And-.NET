@@ -9,10 +9,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: ./first-project
+    strategy:
+      matrix:
+        project: [first-project] # Add project folders here, e.g. [first-project, future-project]
 
     steps:
       - name: Checkout code
@@ -28,13 +27,16 @@ jobs:
         with:
           node-version: 20
           cache: "pnpm"
-          cache-dependency-path: "./first-project/pnpm-lock.yaml"
+          cache-dependency-path: "./${{ matrix.project }}/web/pnpm-lock.yaml"
 
       - name: Install dependencies
+        working-directory: ./${{ matrix.project }}/web
         run: pnpm install
 
       - name: Type check
+        working-directory: ./${{ matrix.project }}/web
         run: pnpm run type-check
 
       - name: Build
+        working-directory: ./${{ matrix.project }}/web
         run: pnpm run build-only
