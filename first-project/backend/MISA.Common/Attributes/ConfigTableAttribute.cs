@@ -1,7 +1,7 @@
 ﻿namespace MISA.Common.Attributes;
 
-[AttributeUsage(AttributeTargets.Property)]
+[AttributeUsage(AttributeTargets.Class)]
 public class ConfigTableAttribute(string tableName) : Attribute
 {
-    public readonly string TableName = tableName;
+    public string TableName { get; set; } = tableName;
 }

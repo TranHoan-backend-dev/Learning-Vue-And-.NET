@@ -15,7 +15,7 @@ public static class ExtensionUtility
     /// </summary>
     /// <param name="type">
     /// Cho phep 1 doi tuong kieu Type goi method nay nhu the no thuoc ve Type
-    /// VD: typeof(Employee). Khi do co the goi typeof(Employee).GetTableNameOnly()
+    /// VD: typeof(Candidate). Khi do co the goi typeof(Candidate).GetTableNameOnly()
     /// </param>
     /// <returns></returns>
     public static string GetTableNameOnly(this Type type)

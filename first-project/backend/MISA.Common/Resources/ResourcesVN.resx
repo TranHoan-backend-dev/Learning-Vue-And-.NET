@@ -24,4 +24,7 @@
     <data name="DuplicatedEmail" xml:space="preserve">
         <value>Email bi trung</value>
     </data>
+    <data name="Exception" xml:space="preserve">
+        <value>Co loi trong khi xu ly yeu cau</value>
+    </data>
 </root>

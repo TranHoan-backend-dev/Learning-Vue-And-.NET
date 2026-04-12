@@ -1,18 +1,22 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using MISA.Common.Attributes;
 using MISA.Common.Base;
 using MISA.Common.Resources;
 
 namespace MISA.Common.Model;
 
-public class Employee : BaseModel
+[ConfigTable("Candidate")]
+public class Candidate : BaseModel
 {
-    [Key]
-    public Guid EmployeeId { get; set; }
+    [Key] public Guid EmployeeId { get; set; }
     public required string Name { get; set; }
-    [CheckDuplicate(ResourcesVN.DuplicatedPhone)]
+
+    [CheckDuplicate(nameof(ResourcesVN.DuplicatedPhone))]
     public required string Phone { get; set; }
+
+    [CheckDuplicate(nameof(ResourcesVN.DuplicatedEmail))]
     public required string Email { get; set; }
+
     public required string HiringCampaign { get; set; }
     public required string HiringPosition { get; set; }
     public required string HiringRound { get; set; }

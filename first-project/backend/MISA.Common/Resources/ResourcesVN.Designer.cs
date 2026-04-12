@@ -21,7 +21,7 @@ namespace MISA.Common.Resources {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class ResourcesVN {
+    public class ResourcesVN {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -74,6 +74,15 @@ namespace MISA.Common.Resources {
         public static string DuplicatedPhone {
             get {
                 return ResourceManager.GetString("DuplicatedPhone", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Co loi trong khi xu ly yeu cau.
+        /// </summary>
+        public static string Exception {
+            get {
+                return ResourceManager.GetString("Exception", resourceCulture);
             }
         }
     }

@@ -1,0 +1,45 @@
+@host = http://localhost:5156
+@id = 00000000-0000-0000-0000-000000000000
+
+### Create new candidate
+POST {{host}}/v1/api/Candidates
+Content-Type: application/json
+
+{
+  "employeeId": "00000000-0000-0000-0000-000000000001",
+  "name": "Nguyen Van A",
+  "phone": "0123456789",
+  "email": "a@example.com",
+  "hiringCampaign": "Campaign 1",
+  "hiringPosition": "Developer",
+  "hiringRound": "Round 1",
+  "review": "Good candidate",
+  "hiringAt": "2024-01-01T00:00:00",
+  "status": true
+}
+
+### Update candidate (replace {{id}} with actual id or set @id at top)
+PUT {{host}}/v1/api/Candidates/{{id}}
+Content-Type: application/json
+
+{
+  "employeeId": "{{id}}",
+  "name": "Nguyen Van A - Updated",
+  "phone": "0987654321",
+  "email": "a.updated@example.com",
+  "hiringCampaign": "Campaign 1",
+  "hiringPosition": "Senior Developer",
+  "hiringRound": "Round 2",
+  "review": "Updated review",
+  "hiringAt": "2024-02-01T00:00:00",
+  "status": true
+}
+
+### Bad request example (missing required fields)
+POST {{host}}/v1/api/Candidates
+Content-Type: application/json
+
+{
+  "employeeId": "00000000-0000-0000-0000-000000000002",
+  "phone": "0123"
+}
