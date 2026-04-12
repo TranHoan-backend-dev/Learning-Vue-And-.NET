@@ -4,7 +4,7 @@ using MySqlConnector;
 
 namespace DL.Context;
 
-public class DbContext(IConfiguration config)
+public abstract class DbContext(IConfiguration config)
 {
     private readonly string _connString = config.GetConnectionString("MISA_AMIS_Conn")!;
 

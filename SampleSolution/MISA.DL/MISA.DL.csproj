@@ -5,6 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>DL</RootNamespace>
+    <UserSecretsId>f39fe362-f85a-4b92-8809-4f018dc56fae</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
