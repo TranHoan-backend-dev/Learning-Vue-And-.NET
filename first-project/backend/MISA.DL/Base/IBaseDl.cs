@@ -1,9 +1,9 @@
-﻿using Dapper;
+using Dapper;
 using MISA.Common.Base;
 
 namespace MISA.DL.Base;
 
-public interface IBaseDl<T>
+public interface IBaseDl<T> where T : BaseModel
 {
     Task<IEnumerable<T>?> GetAllAsync(BaseModel model);
     Task<IEnumerable<T>?> GetPagedAsync(int pageNumber, int pageSize);

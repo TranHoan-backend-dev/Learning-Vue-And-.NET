@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using Dapper;
 using Microsoft.Extensions.Logging;
 using MISA.BL.Base;
@@ -9,29 +9,29 @@ using MISA.DL.Base;
 
 namespace MISA.BL.Service;
 
-public class BaseBl(
-    IBaseDl<BaseModel> baseDl,
-    ILogger<BaseBl> log
-) : IBaseBl<BaseModel>
+public sealed class BaseBl<T>(
+    IBaseDl<T> baseDl,
+    ILogger<BaseBl<T>> log
+) : IBaseBl<T> where T : BaseModel
 {
     private readonly string _logPrefix = "[BaseBl]";
 
-    public Task<IEnumerable<BaseModel>> GetAllAsync()
+    public Task<IEnumerable<T>> GetAllAsync()
     {
         throw new NotImplementedException();
     }
 
-    public Task<BaseModel?> GetByIdAsync(Guid id)
+    public Task<T?> GetByIdAsync(Guid id)
     {
         throw new NotImplementedException();
     }
 
-    public Task DeleteAsync(BaseModel model, Guid id)
+    public Task DeleteAsync(T model, Guid id)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<List<BaseModel>> SaveDataAsync(List<BaseModel> models)
+    public async Task<List<T>> SaveDataAsync(List<T> models)
     {
         log.LogInformation("{prefix} Save data", _logPrefix);
         if (models.Count > 0)
@@ -41,8 +41,6 @@ public class BaseBl(
             var rowInsert = models.Where(m =>
                     m.State == AppEnum.ModelState.Insert || m.State == AppEnum.ModelState.Update)
                 .ToList();
-            // var rowDelete = models.Where(m => m.State == AppEnum.ModelState.Delete)
-            // .ToList();
 
             var param = new DynamicParameters();
             var command = BuildQueryStringInsertAndUpdate(rowInsert, ref param);
@@ -50,13 +48,13 @@ public class BaseBl(
 
             var result = await baseDl.ExecuteCommandText(command, param);
             log.LogDebug("{prefix} Output: {res}", _logPrefix, result);
-            return (List<BaseModel>)result;
+            return models;
         }
 
-        return new List<BaseModel>();
+        return [];
     }
 
-    private String BuildQueryStringInsertAndUpdate(List<BaseModel> models, ref DynamicParameters parameters)
+    private String BuildQueryStringInsertAndUpdate(List<T> models, ref DynamicParameters parameters)
     {
         var sql = new StringBuilder();
         var type = models[0].GetType();
@@ -78,7 +76,9 @@ public class BaseBl(
                 keyValue = Guid.NewGuid();
             }
 
-            var s = "@" + string.Join($"_{count++},@", columns) + $"_{count}";
+            var parameterNames = columns.Select(col => $"@{col}_{count}");
+            var s = string.Join(",", parameterNames);
+
             log.LogDebug("{prefix} Append sql command: {s}", _logPrefix, s);
             if (isFirst)
             {
@@ -95,6 +95,8 @@ public class BaseBl(
                 var value = primaryKey == col ? keyValue : model.GetValue(col);
                 parameters.Add($"@{col}_{count}", value);
             }
+
+            count++;
         }
 
         log.LogInformation("{prefix} Append update command", _logPrefix);
@@ -105,7 +107,7 @@ public class BaseBl(
         return sql.ToString();
     }
 
-    protected virtual Task BeforeSave(List<BaseModel> models)
+    private Task BeforeSave(List<T> models)
     {
         foreach (var item in models)
         {

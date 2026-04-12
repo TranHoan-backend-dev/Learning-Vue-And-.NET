@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using MISA.BL.Base;
 using MISA.Common.Enum;
 using MISA.Common.Model;
@@ -40,7 +40,7 @@ public class CandidatesController(
     }
 
     [HttpPost]
-    public async Task<IActionResult> AddNewEmployee([FromBody] Candidate candidate)
+    public async Task<IActionResult> AddNewCandidate([FromBody] Candidate candidate)
     {
         log.LogInformation($"{LogPrefix} Create new candidate");
         try

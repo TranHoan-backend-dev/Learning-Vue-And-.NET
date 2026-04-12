@@ -8,7 +8,7 @@ namespace MISA.Common.Model;
 [ConfigTable("Candidate")]
 public class Candidate : BaseModel
 {
-    [Key] public Guid EmployeeId { get; set; }
+    [Key] public Guid CandidateId { get; set; }
     public required string Name { get; set; }
 
     [CheckDuplicate(nameof(ResourcesVN.DuplicatedPhone))]
