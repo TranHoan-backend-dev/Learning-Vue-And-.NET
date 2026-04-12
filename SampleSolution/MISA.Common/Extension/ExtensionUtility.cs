@@ -82,9 +82,8 @@ public static class ExtensionUtility
             }
             else
             {
-                // PropertyInfo[] info = objEntity.GetType().GetProperty(propertyName);
-                PropertyInfo? info = objEntity.GetType().GetProperty(propertyName);
-                if (info is not null)
+                PropertyInfo info = objEntity.GetType().GetProperty(propertyName);
+                if (info != null)
                 {
                     return info.GetValue(objEntity);
                 }

@@ -17,7 +17,9 @@ namespace MISA.API.Controllers
         {
             try
             {
-                var res = await baseBl.UpdateAsync(model, id);
+                // var res = await baseBl.UpdateAsync(model, id);
+                model.State = Model.Enum.ModelState.Update;
+                var res = await baseBl.SaveData(new List<BaseModel>() {model});
                 return Ok(new ApiResponse()
                 {
                     Status = (int)AppEnum.StatusCode.Success,
@@ -72,7 +74,8 @@ namespace MISA.API.Controllers
                 return Ok(new ApiResponse()
                 {
                     Status = (int)AppEnum.StatusCode.Success,
-                    Message = "Employee added"
+                    Message = "Employee added",
+                    Data = res
                 });
             }
             catch (Exception e)
@@ -120,6 +123,26 @@ namespace MISA.API.Controllers
                         MoreInfo = e.ToString(),
                     }
                 );
+            }
+        }
+
+        [HttpPost("SaveMultipleData")]
+        public async Task<IActionResult> SaveMultipleData([FromBody] List<BaseModel> models)
+        {
+            try
+            {
+                foreach (var item in models)
+                {
+                    item.State = Model.Enum.ModelState.Insert;
+                }
+
+                var res = await baseBl.SaveData(models);
+                return Ok(res);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
             }
         }
     }
