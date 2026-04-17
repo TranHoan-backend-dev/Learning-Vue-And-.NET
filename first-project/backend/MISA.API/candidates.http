@@ -6,13 +6,12 @@ POST {{host}}/v1/api/Candidates
 Content-Type: application/json
 
 {
-  "employeeId": "00000000-0000-0000-0000-000000000001",
-  "name": "Nguyen Van A",
-  "phone": "0123456789",
+  "name": "Kieu Van A",
+  "phone": "0123499999",
   "email": "a@example.com",
-  "hiringCampaign": "Campaign 1",
-  "hiringPosition": "Developer",
-  "hiringRound": "Round 1",
+  "hiringCampaign": "Campaign 2",
+  "hiringPosition": "Tester",
+  "hiringRound": "Round 3",
   "review": "Good candidate",
   "hiringAt": "2024-01-01T00:00:00",
   "status": true
@@ -24,7 +23,7 @@ Content-Type: application/json
 
 {
   "employeeId": "{{id}}",
-  "name": "Nguyen Van A - Updated",
+  "name": "Nguyen Van A - Updated 1",
   "phone": "0987654321",
   "email": "a.updated@example.com",
   "hiringCampaign": "Campaign 1",
@@ -43,3 +42,24 @@ Content-Type: application/json
   "employeeId": "00000000-0000-0000-0000-000000000002",
   "phone": "0123"
 }
+
+### Get candidates (default pagination)
+GET {{host}}/v1/api/Candidates
+
+### Get candidates with keyword search
+GET {{host}}/v1/api/Candidates?Keyword=Nguyen
+
+### Get candidates with pagination
+GET {{host}}/v1/api/Candidates?PageIndex=0&PageSize=5
+
+### Get candidates with column filter (Name contains 'Nguyen')
+GET {{host}}/v1/api/Candidates?ColumnFilters[0].Column=Name&ColumnFilters[0].Value=Nguyen&ColumnFilters[0].DataType=0&ColumnFilters[0].FilterType=0
+
+### Get candidates with multiple column filters
+GET {{host}}/v1/api/Candidates?ColumnFilters[0].Column=Name&ColumnFilters[0].Value=Nguyen&ColumnFilters[0].DataType=0&ColumnFilters[0].FilterType=0&ColumnFilters[1].Column=HiringPosition&ColumnFilters[1].Value=Developer&ColumnFilters[1].DataType=0&ColumnFilters[1].FilterType=0
+
+### Get candidates with date filter (HiringAt >= 2024-01-01)
+GET {{host}}/v1/api/Candidates?ColumnFilters[0].Column=HiringAt&ColumnFilters[0].Value=2024-01-01&ColumnFilters[0].DataType=1&ColumnFilters[0].FilterType=6
+
+### Get candidates with both keyword and column filter
+GET {{host}}/v1/api/Candidates?Keyword=Nguyen&ColumnFilters[0].Column=HiringPosition&ColumnFilters[0].Value=Developer&ColumnFilters[0].DataType=0&ColumnFilters[0].FilterType=0

@@ -2,9 +2,11 @@ using System.Text;
 using Dapper;
 using Microsoft.Extensions.Logging;
 using MISA.BL.Base;
+using MISA.BL.DTO.Request;
 using MISA.Common.Base;
 using MISA.Common.Enum;
 using MISA.Common.Extension;
+using MISA.Common.Model;
 using MISA.DL.Base;
 
 namespace MISA.BL.Service;
@@ -16,9 +18,12 @@ public sealed class BaseBl<T>(
 {
     private readonly string _logPrefix = "[BaseBl]";
 
-    public Task<IEnumerable<T>> GetAllAsync()
+    public async Task<IEnumerable<T>?> GetAllAsync(Pageable pageable, FilterRequest request)
     {
-        throw new NotImplementedException();
+        log.LogInformation($"{_logPrefix} Get data with pageable: {pageable}, keyword: {request.Keyword}");
+        var parameter = new DynamicParameters();
+        var sql = BuildQueryStringWithCondition(request, pageable.PageIndex, pageable.PageSize, ref parameter);
+        return await baseDl.GetPagedAsync(parameter, sql);
     }
 
     public Task<T?> GetByIdAsync(Guid id)
@@ -54,20 +59,22 @@ public sealed class BaseBl<T>(
         return [];
     }
 
+    #region Build query
+
     private String BuildQueryStringInsertAndUpdate(List<T> models, ref DynamicParameters parameters)
     {
         var sql = new StringBuilder();
         var type = models[0].GetType();
 
         var tableName = type.GetTableNameOnly();
-        var primaryKey = type.GetPrimaryKeyType();
+        var primaryKey = type.GetPrimaryKeyAttribute();
         var columns = type.GetAllColumns();
 
         var columnsList = string.Join(",", columns);
         sql.Append($"INSERT INTO `{tableName}` ({columnsList}) VALUES");
 
         var isFirst = true;
-        var count = 0;
+        int count = default;
         foreach (var model in models)
         {
             // neu parse fail hoac keyValue bi empty thi tao key moi
@@ -106,6 +113,100 @@ public sealed class BaseBl<T>(
         sql.AppendLine($"ON DUPLICATE KEY UPDATE {string.Join(", ", columnUpdate)}");
         return sql.ToString();
     }
+
+    private string BuildQueryStringWithCondition(FilterRequest request, int pageIndex, decimal pageSize,
+        ref DynamicParameters parameters)
+    {
+        var keyword = request.Keyword;
+        var columnFilters = request.ColumnFilters?.ToList();
+
+        var type = typeof(T);
+        var tableName = type.GetTableNameOnly();
+        var columns = type.GetAllColumns();
+        var searchableColumns = type.GetSearchableColumns();
+
+        var query = new StringBuilder($"SELECT {string.Join(", ", columns)} FROM `{tableName}`");
+        var conditions = new List<string>();
+
+        // 1. Search by keyword
+        if (!string.IsNullOrWhiteSpace(keyword))
+        {
+            var keywordConditions = searchableColumns.Select(c => $"{c} LIKE @keyword");
+            conditions.Add("(\n        " + string.Join("\n        OR ", keywordConditions) + "\n    )");
+            parameters.Add("@keyword", $"%{keyword}%");
+        }
+
+        // xu ly bo loc
+        if (columnFilters is not null && columnFilters.Any())
+        {
+            foreach (var item in columnFilters)
+            {
+                var columnName = type.GetPropertyInModel(item.Column);
+                if (string.IsNullOrWhiteSpace(columnName)) continue;
+
+                var dataType = item.DataType;
+                var condition = new StringBuilder();
+
+                if (dataType == AppEnum.DataType.String)
+                {
+                    var pattern = item.FilterType switch
+                    {
+                        AppEnum.FilterType.Contains or AppEnum.FilterType.NotContains
+                            => $"%{item.Value}%",
+                        AppEnum.FilterType.StartWith => $"{item.Value}%",
+                        AppEnum.FilterType.EndWith => $"%{item.Value}",
+                        _ => null
+                    };
+
+                    if (pattern is not null)
+                    {
+                        var operand = item.FilterType == AppEnum.FilterType.NotContains ? "NOT LIKE" : "LIKE";
+                        condition.Append($"{columnName} {operand} @filter_{columnName}");
+                        parameters.Add($"@filter_{columnName}", pattern);
+                    }
+                }
+                else if (dataType == AppEnum.DataType.DateTime)
+                {
+                    var operand = item.FilterType switch
+                    {
+                        AppEnum.FilterType.Equals => "=",
+                        AppEnum.FilterType.NotEquals => "<>",
+                        AppEnum.FilterType.GreaterThanOrEqual => ">=",
+                        AppEnum.FilterType.LessThanOrEqual => "<=",
+                        _ => null
+                    };
+
+                    if (operand is not null)
+                    {
+                        condition.Append($"{columnName} {operand} @filter_{columnName}");
+                        parameters.Add($"@filter_{columnName}", item.Value);
+                    }
+                }
+
+                if (condition.Length > 0)
+                {
+                    conditions.Add($"({condition})");
+                }
+            }
+        }
+
+        // 3. Combine conditions
+        if (conditions.Count > 0)
+        {
+            query.Append(" WHERE ");
+            query.Append(string.Join(" AND ", conditions));
+        }
+
+        // Them limit offset
+        query.AppendLine(" LIMIT @limit OFFSET @offset");
+        parameters.Add("@limit", pageSize);
+        parameters.Add("@offset", pageIndex * pageSize);
+
+        log.LogInformation($"{_logPrefix} Final query: {query}");
+        return query.ToString();
+    }
+
+    #endregion
 
     private Task BeforeSave(List<T> models)
     {

@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using MISA.BL.Base;
+using MISA.BL.DTO.Request;
 using MISA.Common.Enum;
 using MISA.Common.Model;
+
 // using MISA.Common.Resources;
 
 namespace MISA.API.Controllers;
@@ -19,48 +21,32 @@ public class CandidatesController(
     public async Task<IActionResult> Update([FromBody] Candidate candidate, [FromRoute] Guid id)
     {
         log.LogInformation($"{LogPrefix} Updated Candidate with id: {id}");
-        // try
-        // {
-            candidate.State = AppEnum.ModelState.Update;
-            var res = await baseBl.SaveDataAsync([candidate]);
-            return Ok(res);
-        // }
-        // catch (System.Exception e)
-        // {
-        //     log.LogError(e, $"{LogPrefix} Error updating entity with id {id}");
-        //     return StatusCode(
-        //         (int)AppEnum.StatusCode.InternalServerError,
-        //         new ErrorResult()
-        //         {
-        //             DevMsg = e.Message,
-        //             UserMsg = ResourcesVN.Exception,
-        //             MoreInfo = e.ToString(),
-        //         });
-        // }
+        var res = await baseBl.SaveDataAsync([candidate]);
+        return Ok(res);
     }
 
     [HttpPost]
     public async Task<IActionResult> AddNewCandidate([FromBody] Candidate candidate)
     {
         log.LogInformation($"{LogPrefix} Create new candidate");
-        // try
-        // {
-            candidate.State = AppEnum.ModelState.Insert;
-            var res = await baseBl.SaveDataAsync([candidate]);
-            return Ok(res);
-        // }
-        // catch (System.Exception e)
-        // {
-            // log.LogError(e.Message);
-            // return StatusCode(
-                // (int)AppEnum.StatusCode.InternalServerError,
-                // new ErrorResult()
-                // {
-                    // DevMsg = e.Message,
-                    // UserMsg = ResourcesVN.Exception,
-                    // MoreInfo = e.ToString(),
-                // }
-            // );
-        // }
+        candidate.State = AppEnum.ModelState.Insert;
+        var res = await baseBl.SaveDataAsync([candidate]);
+        return Ok(res);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetCandidates([FromQuery] Pageable pageable, [FromQuery] FilterRequest request)
+    {
+        log.LogInformation($"{LogPrefix} Get Candidates with pageable: {pageable}, request: {request}");
+        var res = await baseBl.GetAllAsync(pageable, request);
+        return Ok(new
+        {
+            Data = res,
+            Pageable = new Pageable()
+            {
+                PageIndex = pageable.PageIndex,
+                PageSize = pageable.PageSize,
+            }
+        });
     }
 }

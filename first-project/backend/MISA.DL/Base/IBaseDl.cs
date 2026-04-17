@@ -6,7 +6,7 @@ namespace MISA.DL.Base;
 public interface IBaseDl<T> where T : BaseModel
 {
     Task<IEnumerable<T>?> GetAllAsync(BaseModel model);
-    Task<IEnumerable<T>?> GetPagedAsync(int pageNumber, int pageSize);
+    Task<IEnumerable<T>?> GetPagedAsync(DynamicParameters parameters, string command);
     Task<T?> GetByIdAsync(Guid id);
     Task UpdateAsync(T entity, Guid id);
     Task DeleteAsync(T entity, Guid id);

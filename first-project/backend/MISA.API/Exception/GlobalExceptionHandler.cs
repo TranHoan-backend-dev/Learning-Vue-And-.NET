@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Diagnostics;
 using MISA.Common.Enum;
 using MISA.Common.Exception;
 using MISA.Common.Model;
@@ -11,12 +11,14 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> log) : IExce
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, System.Exception exception,
         CancellationToken cancellationToken)
     {
-        log.LogInformation("Handle global exception");
+        log.LogError(exception, "[GlobalExceptionHandler] Exception occurred: {Message}", exception.Message);
+
         var (status, message) = exception switch
         {
             AlreadyExistsException => (AppEnum.StatusCode.BadRequest, exception.Message),
             NotFoundException => (AppEnum.StatusCode.NotFound, exception.Message),
             UnauthorizedAccessException => (AppEnum.StatusCode.Unauthorized, exception.Message),
+            // System.Data.DataException => (AppEnum.StatusCode.InternalServerError, "Database error: " + exception.Message),
             _ => (AppEnum.StatusCode.InternalServerError, exception.Message)
         };
 

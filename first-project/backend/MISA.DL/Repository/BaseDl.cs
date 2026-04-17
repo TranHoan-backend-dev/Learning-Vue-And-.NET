@@ -15,7 +15,7 @@ public class BaseDl<TBaseModel>(
 {
     private const string LogPrefix = "[BaseDl]";
 
-    public async Task<IEnumerable<TBaseModel>?> GetAllAsync(Common.Base.BaseModel model)
+    public async Task<IEnumerable<TBaseModel>?> GetAllAsync(BaseModel model)
     {
         log.LogInformation("{prefix} Get all models", LogPrefix);
         var storedProcedure = string.Format(ProcedureNames.GetAll, model.GetType().Name);
@@ -28,11 +28,15 @@ public class BaseDl<TBaseModel>(
         return res;
     }
 
-    public Task<IEnumerable<TBaseModel>?> GetPagedAsync(int pageNumber, int pageSize)
+    public async Task<IEnumerable<TBaseModel>?> GetPagedAsync(DynamicParameters parameters, string command)
     {
         log.LogInformation("{prefix} Get paginated models list", LogPrefix);
-        throw new NotImplementedException();
+        using var conn = context.GetConnection();
+        var res = await conn.QueryAsync<TBaseModel>(command, param: parameters);
+        log.LogDebug("Response: {res}", res);
+        return res;
     }
+
 
     public async Task<TBaseModel?> GetByIdAsync(Guid id)
     {

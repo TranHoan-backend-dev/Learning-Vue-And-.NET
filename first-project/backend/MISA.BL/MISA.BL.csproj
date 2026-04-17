@@ -12,4 +12,8 @@
       <ProjectReference Include="..\MISA.DL\MISA.DL.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="DTO\Response\" />
+    </ItemGroup>
+
 </Project>

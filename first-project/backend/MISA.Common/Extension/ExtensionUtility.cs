@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
 using MISA.Common.Attributes;
@@ -20,11 +20,8 @@ public static class ExtensionUtility
     /// <returns></returns>
     public static string GetTableNameOnly(this Type type)
     {
-        return ((ConfigTableAttribute)type.GetCustomAttributes(
-                typeof(ConfigTableAttribute),
-                true
-            )
-            .FirstOrDefault()!).TableName;
+        var attribute = type.GetCustomAttribute<ConfigTableAttribute>(true);
+        return attribute?.TableName ?? type.Name;
     }
 
     /// <summary>
@@ -32,7 +29,7 @@ public static class ExtensionUtility
     /// </summary>
     /// <param name="type"></param>
     /// <returns></returns>
-    public static string GetPrimaryKeyType(this Type type)
+    public static string GetPrimaryKeyAttribute(this Type type)
     {
         var primaryKeyName = string.Empty;
         // lay ra toan bo property
@@ -53,21 +50,51 @@ public static class ExtensionUtility
     }
 
     /// <summary>
+    /// Cho phep lay ra ten khoa chinh + ten cot tuong ung trong bang
+    /// </summary>
+    /// <param name="type">Kieu Model</param>
+    /// <returns>
+    /// <ul>
+    ///     <li>keyModel: Ten cua thuoc tinh trong Model dung lam khoa chinh</li>
+    ///     <li>keyTable: Ten cua cot khoa chinh trong DB</li>
+    /// </ul>
+    /// </returns>
+    public static (string keyModel, string keyTable) GetPrimaryKey(this Type type)
+    {
+        var keyModel = string.Empty;
+        var keyTable = string.Empty;
+        var properties = type.GetProperties();
+        if (properties.Length > 0)
+        {
+            var propertyInfoKey = properties.SingleOrDefault(p =>
+                p.GetCustomAttribute<KeyAttribute>(true) is not null
+            );
+            if (propertyInfoKey is not null)
+            {
+                keyModel = propertyInfoKey.Name;
+                keyTable = propertyInfoKey.GetCustomAttribute<ConfigColumnAttribute>()?.ColumnName ?? propertyInfoKey.Name;
+            }
+        }
+
+        return (keyModel, keyTable);
+    }
+
+    /// <summary>
     /// Lay ra toan bo cac thuoc tinh duoc map xuong DB (tru NotMapped)
     /// </summary>
     /// <param name="type"></param>
     /// <returns></returns>
     public static List<string> GetAllColumns(this Type type)
     {
-        List<string> columns = new List<string>();
-        PropertyInfo[] properties = type.GetProperties();
+        var columns = new List<string>();
+        var properties = type.GetProperties();
         if (properties.Length > 0)
         {
             // Tim bat cu ban ghi nao khong co NotMapped
-            columns = properties.Where(p => !p
-                    .GetCustomAttributes<NotMappedAttribute>(true).Any()
-                ).Select(p => p.Name)
-                .ToList();
+            columns = properties.Where(p => p.GetCustomAttribute<NotMappedAttribute>(true) is null)
+                .Select(p => p.GetCustomAttribute<ConfigColumnAttribute>(true)?.ColumnName)
+                .Where(colName => colName != null)
+                .ToList()!;
         }
 
         return columns;
@@ -119,5 +146,59 @@ public static class ExtensionUtility
         // neu la obj binh thuong
         var info = objEntity.GetType().GetProperty(propertyName);
         return info?.GetValue(objEntity);
+    }
+
+    /// <summary>
+    /// Cho phep lay ra danh sach ten cot va ten thuoc tinh tuong ung cua no
+    /// </summary>
+    /// <param name="type"></param>
+    /// <returns>
+    /// <ul>
+    ///     <li>propertiesModel: Ten cua thuoc tinh trong Model</li>
+    ///     <li>columnsTable: Ten cua cot trong DB</li>
+    /// </ul>
+    /// </returns>
+    public static (List<string> columnsTable, List<string> propertiesModel) GetAllColumnsAndProperties(this Type type)
+    {
+        var columnsTable = new List<string>();
+        var propertiesModel = new List<string>();
+        var properties = type.GetProperties();
+
+        if (properties.Length > 0)
+        {
+            columnsTable = properties.Where(p => p.GetCustomAttribute<NotMappedAttribute>(true) is null) // loc va loai bo tat ca cac phan tu not mapped
+                .Select(p => p.GetCustomAttribute<ConfigColumnAttribute>()?.ColumnName) // chon va lay ra column name
+                .Where(p => p is not null) // loc nhung phan tu bi null
+                .ToList()!;
+            propertiesModel = properties.Where(p =>
+                    p.GetCustomAttribute<NotMappedAttribute>(true) is null &&
+                    p.GetCustomAttribute<ConfigColumnAttribute>(true) is not null)
+                .Select(p => p.Name)
+                .ToList();
+        }
+
+        return (columnsTable, propertiesModel);
+    }
+
+    /// <summary>
+    /// Lay tat ca cac thuoc tinh co the tim kiem duoc
+    /// </summary>
+    /// <param name="type"></param>
+    /// <returns></returns>
+    public static List<string> GetSearchableColumns(this Type type)
+    {
+        var properties = type.GetProperties();
+        return properties.Where(p => p.GetCustomAttribute<ConfigSearchableColumnAttribute>(true) is not null)
+            .Select(p => p.GetCustomAttribute<ConfigColumnAttribute>(true)?.ColumnName)
+            .Where(colName => colName != null)
+            .ToList()!;
+    }
+
+    public static string? GetPropertyInModel(this Type type, string column)
+    {
+        var properties = type.GetProperties();
+        return properties.Where(p => p.Name.Equals(column, StringComparison.OrdinalIgnoreCase))
+            .Select(p => p.GetCustomAttribute<ConfigColumnAttribute>()?.ColumnName)
+            .FirstOrDefault();
     }
 }

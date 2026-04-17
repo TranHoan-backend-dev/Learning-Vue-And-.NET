@@ -2,7 +2,7 @@
 
 public static class AppEnum
 {
-    public enum StatusCode: int
+    public enum StatusCode : int
     {
         Success = 200,
         BadRequest = 400,
@@ -20,5 +20,23 @@ public static class AppEnum
         Insert = 1,
         Update = 2,
         Delete = 3
+    }
+
+    public enum FilterType
+    {
+        Contains = 0,
+        NotContains = 1,
+        StartWith = 2,
+        EndWith = 3,
+        Equals = 4,
+        NotEquals = 5,
+        GreaterThanOrEqual = 6,
+        LessThanOrEqual = 7,
+    }
+
+    public enum DataType: int
+    {
+        String = 0,
+        DateTime = 1
     }
 }
