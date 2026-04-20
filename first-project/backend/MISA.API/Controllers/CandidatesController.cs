@@ -46,6 +46,7 @@ public class CandidatesController(
             {
                 PageIndex = pageable.PageIndex,
                 PageSize = pageable.PageSize,
+                TotalElements = baseBl.CountTotalElements().Result
             }
         });
     }

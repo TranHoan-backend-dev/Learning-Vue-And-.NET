@@ -12,4 +12,6 @@ public interface IBaseBl<T> where T : BaseModel
     // Task<int> UpdateAsync(BaseModel model, Guid id);
     Task DeleteAsync(T model, Guid id);
     Task<List<T>> SaveDataAsync(List<T> models);
+
+    Task<int> CountTotalElements();
 }

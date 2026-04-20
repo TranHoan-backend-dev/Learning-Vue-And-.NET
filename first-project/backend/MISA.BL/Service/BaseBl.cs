@@ -59,6 +59,11 @@ public sealed class BaseBl<T>(
         return [];
     }
 
+    public Task<int> CountTotalElements()
+    {
+        return baseDl.CountTotalElements();
+    }
+
     #region Build query
 
     private String BuildQueryStringInsertAndUpdate(List<T> models, ref DynamicParameters parameters)
@@ -117,26 +122,26 @@ public sealed class BaseBl<T>(
     private string BuildQueryStringWithCondition(FilterRequest request, int pageIndex, decimal pageSize,
         ref DynamicParameters parameters)
     {
-        var keyword = request.Keyword;
-        var columnFilters = request.ColumnFilters?.ToList();
-
         var type = typeof(T);
         var tableName = type.GetTableNameOnly();
         var columns = type.GetAllColumns();
-        var searchableColumns = type.GetSearchableColumns();
 
         var query = new StringBuilder($"SELECT {string.Join(", ", columns)} FROM `{tableName}`");
         var conditions = new List<string>();
 
         // 1. Search by keyword
+        var keyword = request.Keyword;
+        var searchableColumns = type.GetSearchableColumns();
         if (!string.IsNullOrWhiteSpace(keyword))
         {
             var keywordConditions = searchableColumns.Select(c => $"{c} LIKE @keyword");
-            conditions.Add("(\n        " + string.Join("\n        OR ", keywordConditions) + "\n    )");
+            var operand = string.Join($"\n        {AppEnum.Operand.Or} ", keywordConditions);
+            conditions.Add("(\n        " + operand + "\n    )");
             parameters.Add("@keyword", $"%{keyword}%");
         }
 
         // xu ly bo loc
+        var columnFilters = request.ColumnFilters?.ToList();
         if (columnFilters is not null && columnFilters.Any())
         {
             foreach (var item in columnFilters)
@@ -160,7 +165,9 @@ public sealed class BaseBl<T>(
 
                     if (pattern is not null)
                     {
-                        var operand = item.FilterType == AppEnum.FilterType.NotContains ? "NOT LIKE" : "LIKE";
+                        var operand = item.FilterType == AppEnum.FilterType.NotContains
+                            ? AppEnum.Operand.NotLike
+                            : AppEnum.Operand.Like;
                         condition.Append($"{columnName} {operand} @filter_{columnName}");
                         parameters.Add($"@filter_{columnName}", pattern);
                     }
@@ -169,10 +176,10 @@ public sealed class BaseBl<T>(
                 {
                     var operand = item.FilterType switch
                     {
-                        AppEnum.FilterType.Equals => "=",
-                        AppEnum.FilterType.NotEquals => "<>",
-                        AppEnum.FilterType.GreaterThanOrEqual => ">=",
-                        AppEnum.FilterType.LessThanOrEqual => "<=",
+                        AppEnum.FilterType.Equals => AppEnum.Operand.Equal,
+                        AppEnum.FilterType.NotEquals => AppEnum.Operand.NotEqual,
+                        AppEnum.FilterType.GreaterThanOrEqual => AppEnum.Operand.GreaterThanOrEqual,
+                        AppEnum.FilterType.LessThanOrEqual => AppEnum.Operand.LessThanOrEqual,
                         _ => null
                     };
 
@@ -194,7 +201,7 @@ public sealed class BaseBl<T>(
         if (conditions.Count > 0)
         {
             query.Append(" WHERE ");
-            query.Append(string.Join(" AND ", conditions));
+            query.Append(string.Join(AppEnum.Operand.And, conditions));
         }
 
         // Them limit offset

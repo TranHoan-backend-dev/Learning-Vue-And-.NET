@@ -12,4 +12,6 @@ public interface IBaseDl<T> where T : BaseModel
     Task DeleteAsync(T entity, Guid id);
     Task<bool> CheckDuplicate(string propName, Object value);
     Task<object> ExecuteCommandText(string commandText, DynamicParameters parameters);
+
+    Task<int> CountTotalElements();
 }

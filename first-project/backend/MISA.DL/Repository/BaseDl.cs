@@ -8,19 +8,19 @@ using MISA.DL.Context;
 
 namespace MISA.DL.Repository;
 
-public class BaseDl<TBaseModel>(
+public class BaseDl<T>(
     DbContext context,
-    ILogger<BaseDl<TBaseModel>> log
-) : IBaseDl<TBaseModel> where TBaseModel : BaseModel
+    ILogger<BaseDl<T>> log
+) : IBaseDl<T> where T : BaseModel
 {
-    private const string LogPrefix = "[BaseDl]";
+    private const string _LogPrefix = "[BaseDl]";
 
-    public async Task<IEnumerable<TBaseModel>?> GetAllAsync(BaseModel model)
+    public async Task<IEnumerable<T>?> GetAllAsync(BaseModel model)
     {
-        log.LogInformation("{prefix} Get all models", LogPrefix);
+        log.LogInformation("{prefix} Get all models", _LogPrefix);
         var storedProcedure = string.Format(ProcedureNames.GetAll, model.GetType().Name);
         using var conn = context.GetConnection();
-        var res = await conn.QueryAsync<TBaseModel>(
+        var res = await conn.QueryAsync<T>(
             storedProcedure,
             commandType: CommandType.StoredProcedure
         );
@@ -28,52 +28,46 @@ public class BaseDl<TBaseModel>(
         return res;
     }
 
-    public async Task<IEnumerable<TBaseModel>?> GetPagedAsync(DynamicParameters parameters, string command)
+    public async Task<IEnumerable<T>?> GetPagedAsync(DynamicParameters parameters, string command)
     {
-        log.LogInformation("{prefix} Get paginated models list", LogPrefix);
+        log.LogInformation("{prefix} Get paginated models list", _LogPrefix);
         using var conn = context.GetConnection();
-        var res = await conn.QueryAsync<TBaseModel>(command, param: parameters);
+        var res = await conn.QueryAsync<T>(command, param: parameters);
         log.LogDebug("Response: {res}", res);
         return res;
     }
 
 
-    public async Task<TBaseModel?> GetByIdAsync(Guid id)
+    public async Task<T?> GetByIdAsync(Guid id)
     {
-        log.LogInformation("{prefix} Get model details by id: {id}", LogPrefix, id.ToString());
-        var storedProcedure = string.Format(ProcedureNames.GetDetails, typeof(TBaseModel).Name);
+        log.LogInformation("{prefix} Get model details by id: {id}", _LogPrefix, id.ToString());
+        var storedProcedure = string.Format(ProcedureNames.GetDetails, typeof(T).Name);
         using var conn = context.GetConnection();
 
         var param = new DynamicParameters();
         param.Add("p_Id", id);
 
-        var res = await conn.QueryFirstOrDefaultAsync<TBaseModel>(
+        var res = await conn.QueryFirstOrDefaultAsync<T>(
             storedProcedure,
             param,
             commandType: CommandType.StoredProcedure
         );
-        log.LogDebug("{prefix} Response: {res}", LogPrefix, res);
+        log.LogDebug("{prefix} Response: {res}", _LogPrefix, res);
         return res;
     }
 
-    public async Task UpdateAsync(TBaseModel entity, Guid id)
+    public async Task UpdateAsync(T entity, Guid id)
     {
-        log.LogInformation("{prefix} Update model details by id: {id}", LogPrefix, id.ToString());
-        var storedProcedure = string.Format(ProcedureNames.Update, typeof(TBaseModel).Name);
+        log.LogInformation("{prefix} Update model details by id: {id}", _LogPrefix, id.ToString());
+        var storedProcedure = string.Format(ProcedureNames.Update, typeof(T).Name);
 
         var param = new DynamicParameters(entity);
         param.Add("p_Id", id);
         var res = await ExecuteCommandText(storedProcedure, param);
-        // using var conn = context.GetConnection();
-        // var res = await conn.ExecuteAsync(
-        // storedProcedure,
-        // param,
-        // commandType: CommandType.StoredProcedure
-        // );
-        log.LogDebug("{prefix} Response: {res}", LogPrefix, res);
+        log.LogDebug("{prefix} Response: {res}", _LogPrefix, res);
     }
 
-    public Task DeleteAsync(TBaseModel entity, Guid id)
+    public Task DeleteAsync(T entity, Guid id)
     {
         throw new NotImplementedException();
     }
@@ -86,20 +80,14 @@ public class BaseDl<TBaseModel>(
     /// <returns>bool</returns>
     public async Task<bool> CheckDuplicate(string propName, object value)
     {
-        log.LogInformation("{prefix} Check duplicate", LogPrefix);
-        var storedProcedure = string.Format(ProcedureNames.CheckDuplicate, typeof(TBaseModel).Name);
+        log.LogInformation("{prefix} Check duplicate", _LogPrefix);
+        var storedProcedure = string.Format(ProcedureNames.CheckDuplicate, typeof(T).Name);
 
         var param = new DynamicParameters();
         param.Add($"p_{propName}", value);
 
-        // using var conn = context.GetConnection();
-        // var res = await conn.ExecuteAsync(
-        // storedProcedure,
-        // param,
-        // commandType: CommandType.StoredProcedure
-        // );
         var res = await ExecuteCommandText(storedProcedure, param);
-        log.LogDebug("{prefix} Response: {res}", LogPrefix, res);
+        log.LogDebug("{prefix} Response: {res}", _LogPrefix, res);
         return (int)res > 0;
     }
 
@@ -111,7 +99,7 @@ public class BaseDl<TBaseModel>(
     /// <returns></returns>
     public async Task<object> ExecuteCommandText(string commandText, DynamicParameters parameters)
     {
-        log.LogInformation("{prefix} Build query: {command}", LogPrefix, commandText);
+        log.LogInformation("{prefix} Build query: {command}", _LogPrefix, commandText);
         using var conn = context.GetConnection();
         var commandType = commandText.Contains(' ') ? CommandType.Text : CommandType.StoredProcedure;
         return await conn.ExecuteAsync(
@@ -119,5 +107,15 @@ public class BaseDl<TBaseModel>(
             parameters,
             commandType: commandType
         );
+    }
+
+    public async Task<int> CountTotalElements()
+    {
+        log.LogInformation($"{_LogPrefix} Count total elements");
+        using var conn = context.GetConnection();
+
+        var type = typeof(T);
+        var query = $"SELECT COUNT(*) FROM `{type.Name}`";
+        return await conn.ExecuteScalarAsync<int>(query);
     }
 }
