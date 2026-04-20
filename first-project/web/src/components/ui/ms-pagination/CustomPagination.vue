@@ -19,31 +19,50 @@ const totalPages = computed(() => Math.ceil(props.total / props.pageSize) || 1);
 
 // Logic tạo dải số trang có dấu ba chấm (...)
 const pages = computed(() => {
-  const current = props.modelValue;
   const total = totalPages.value;
-  const items: (number | string)[] = [];
-
+  const current = props.modelValue;
+  const delta = 1; // Số trang hiển thị bên cạnh trang hiện tại (tổng cộng 3 trang ở giữa)
+  
+  // Nếu tổng số trang nhỏ hơn hoặc bằng 7, hiển thị tất cả
   if (total <= 7) {
-    for (let i = 1; i <= total; i++) items.push(i);
-  } else {
-    items.push(1);
-    if (current > 4) {
-      items.push('...');
-    }
-
-    const start = Math.max(2, current - 2);
-    const end = Math.min(total - 1, current + 2);
-
-    for (let i = start; i <= end; i++) {
-        if (!items.includes(i)) items.push(i);
-    }
-
-    if (current < total - 3) {
-      items.push('...');
-    }
-    if (!items.includes(total)) items.push(total);
+    return Array.from({ length: total }, (_, i) => i + 1);
   }
-  return items;
+
+  const range: (number | string)[] = [];
+  const left = current - delta;
+  const right = current + delta;
+  
+  // Luôn hiển thị trang 1
+  range.push(1);
+
+  if (left > 2) {
+    range.push('...');
+  }
+
+  // Hiển thị các trang xung quanh trang hiện tại
+  // Điều chỉnh để luôn có 3 số ở giữa
+  let start = Math.max(2, left);
+  let end = Math.min(total - 1, right);
+
+  // Đảm bảo luôn hiện đủ số lượng nếu ở gần đầu hoặc cuối
+  if (current <= 3) {
+    end = 4;
+  } else if (current >= total - 2) {
+    start = total - 3;
+  }
+
+  for (let i = start; i <= end; i++) {
+    range.push(i);
+  }
+
+  if (end < total - 1) {
+    range.push('...');
+  }
+
+  // Luôn hiển thị trang cuối
+  range.push(total);
+
+  return range;
 });
 
 const setPage = (page: number | string) => {

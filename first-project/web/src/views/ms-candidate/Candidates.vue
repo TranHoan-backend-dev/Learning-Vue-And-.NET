@@ -11,6 +11,7 @@ import CandidateViewModal from "@/views/ms-candidate/CandidateViewModal.vue";
 import {usePagination} from "@/views/ms-candidate/usePagination.ts"
 import CustomPagination from "@/components/ui/ms-pagination/CustomPagination.vue";
 import CustomSkeleton from "@/components/ui/ms-skeleton/CustomSkeleton.vue";
+import CustomSelect from "@/components/ui/ms-select/CustomSelect.vue";
 import type {BodyProps} from "@/components/ui/ms-table/model.ts";
 import {toast} from "@/services/toast.ts";
 import candidateService, {type Candidate, type Pageable, type FilterRequest} from '@/services/candidateService';
@@ -45,6 +46,15 @@ const {
 const totalPages = computed(() => {
   return Math.ceil(totalRecordsServer.value / pageSize.value) || 1;
 });
+
+// Định nghĩa các lựa chọn cho số bản ghi trên trang
+const pageSizeOptions = [
+  { value: 5, label: "5" },
+  { value: 10, label: "10" },
+  { value: 15, label: "15" },
+  { value: 25, label: "25" },
+  { value: 50, label: "50" },
+];
 
 // Hiển thị thông tin phân trang (ví dụ: 1 - 10 trên 134 bản ghi)
 const pageInfo = computed(() => {
@@ -416,13 +426,14 @@ const confirmDeleting = () => {
           <div class="content_body_footer_right">
             <div class="content_body_footer_pagesize">
               <span class="paging_label">Số bản ghi trên trang</span>
-              <select id="pageSizeSelect" class="page_size_select" v-model="pageSize" @change="handlePageSizeChange">
-                <option :value="5">5</option>
-                <option :value="10">10</option>
-                <option :value="15">15</option>
-                <option :value="25">25</option>
-                <option :value="50">50</option>
-              </select>
+              <div class="page_size_custom_select">
+                <CustomSelect 
+                  v-model="pageSize" 
+                  :options="pageSizeOptions" 
+                  @update:modelValue="handlePageSizeChange"
+                  size="sm"
+                />
+              </div>
             </div>
             <div class="content_body_footer_info">
               <span class="page_info" id="pageInfo">{{ pageInfo }}</span>
@@ -503,5 +514,15 @@ const confirmDeleting = () => {
 
 :deep(.text_right) {
   text-align: right !important;
+}
+
+.content_body_footer_pagesize {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.page_size_custom_select {
+  width: 80px; /* Độ rộng phù hợp cho số bản ghi */
 }
 </style>
