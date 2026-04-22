@@ -20,12 +20,25 @@ public sealed class BaseBl<T>(
 {
     private readonly string _logPrefix = "[BaseBl]";
 
-    public async Task<IEnumerable<T>?> GetAllAsync(Pageable pageable, FilterRequest request)
+    public async Task<PagingData<T>> GetAllAsync(Pageable pageable, FilterRequest request)
     {
         log.LogInformation($"{_logPrefix} Get data with pageable: {pageable}, keyword: {request.Keyword}");
         var parameter = new DynamicParameters();
-        var sql = BuildQueryStringWithCondition(request, pageable.PageIndex, pageable.PageSize, ref parameter);
-        return await baseDl.GetPagedAsync(parameter, sql);
+        var (sql, paginationSql) = BuildQueryStringWithCondition(request, pageable.PageIndex, pageable.PageSize, ref parameter);
+        
+        var data = await baseDl.GetPagedAsync(parameter, sql);
+        var totalElements = await baseDl.GetCountAsync(parameter, paginationSql);
+
+        return new PagingData<T>
+        {
+            Data = data,
+            Pageable = new Pageable
+            {
+                PageIndex = pageable.PageIndex,
+                PageSize = pageable.PageSize,
+                TotalElements = totalElements
+            }
+        };
     }
 
     public Task<T?> GetByIdAsync(Guid id)
@@ -46,9 +59,9 @@ public sealed class BaseBl<T>(
         return 0;
     }
 
-    public Task DeleteAsync(T model, Guid id)
+    public async Task DeleteAsync(List<string> ids)
     {
-        throw new NotImplementedException();
+        await baseDl.DeleteAsync(ids);
     }
 
     public async Task<List<T>> SaveDataAsync(List<T> models)
@@ -72,11 +85,6 @@ public sealed class BaseBl<T>(
         }
 
         return [];
-    }
-
-    public Task<int> CountTotalElements()
-    {
-        return baseDl.CountTotalElements();
     }
 
     #region Build query
@@ -134,7 +142,7 @@ public sealed class BaseBl<T>(
         return sql.ToString();
     }
 
-    private string BuildQueryStringWithCondition(FilterRequest request, int pageIndex, decimal pageSize,
+    private (string, string) BuildQueryStringWithCondition(FilterRequest request, int pageIndex, decimal pageSize,
         ref DynamicParameters parameters)
     {
         var type = typeof(T);
@@ -143,6 +151,8 @@ public sealed class BaseBl<T>(
 
         var query = new StringBuilder($"SELECT {string.Join(", ", columns)} FROM `{tableName}`");
         var conditions = new List<string>();
+
+        var subQuery = new StringBuilder();
 
         // 1. Search by keyword
         var keyword = request.Keyword;
@@ -212,20 +222,24 @@ public sealed class BaseBl<T>(
             }
         }
 
-        // 3. Combine conditions
+        // Combine conditions
         if (conditions.Count > 0)
         {
-            query.Append(" WHERE ");
-            query.Append(string.Join(AppEnum.Operand.And, conditions));
+            subQuery.Append(" WHERE ");
+            subQuery.Append(string.Join(AppEnum.Operand.And, conditions));
         }
+        var pagination = new StringBuilder($"SELECT COUNT(*)  FROM `{tableName}`");
+        pagination.Append(subQuery);
 
         // Them limit offset
-        query.AppendLine("  ORDER BY created_at DESC LIMIT @limit OFFSET @offset");
+        subQuery.AppendLine("  ORDER BY created_at DESC LIMIT @limit OFFSET @offset");
         parameters.Add("@limit", pageSize);
         parameters.Add("@offset", pageIndex * pageSize);
 
+        query.Append(subQuery);
+
         log.LogInformation($"{_logPrefix} Final query: {query}");
-        return query.ToString();
+        return (query.ToString(), pagination.ToString());
     }
 
     #endregion

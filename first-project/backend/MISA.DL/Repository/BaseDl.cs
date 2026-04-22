@@ -41,6 +41,13 @@ public class BaseDl<T>(
         return res;
     }
 
+    public async Task<int> GetCountAsync(DynamicParameters parameters, string command)
+    {
+        log.LogInformation("{prefix} Get total records count", LogPrefix);
+        using var conn = context.GetConnection();
+        return await conn.ExecuteScalarAsync<int>(command, param: parameters);
+    }
+
 
     public async Task<T?> GetByIdAsync(Guid id)
     {
@@ -144,9 +151,20 @@ public class BaseDl<T>(
         log.LogDebug("{prefix} Response: {res}", LogPrefix, response);
     }
 
-    public Task DeleteAsync(T entity, Guid id)
+    public async Task DeleteAsync(List<string> ids)
     {
-        throw new NotImplementedException();
+        log.LogInformation("{prefix} Delete {type} with {count} ids", LogPrefix, typeof(T).Name, ids.Count);
+        if (ids.Count == 0) return;
+
+        var type = typeof(T);
+        var tableName = type.GetTableNameOnly();
+        var primaryKey = type.GetPrimaryKey().keyTable;
+        
+        // Build query using IN clause for better performance and safety
+        var idList = string.Join(", ", ids.Select(id => $"'{id}'"));
+        var command = $"DELETE FROM `{tableName}` WHERE `{primaryKey}` IN ({idList})";
+        
+        await ExecuteCommandText(command, new DynamicParameters());
     }
 
     /// <summary>

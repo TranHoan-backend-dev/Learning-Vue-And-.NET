@@ -62,3 +62,21 @@ GET {{host}}/v1/api/Candidates?ColumnFilters[0].Column=HiringAt&ColumnFilters[0]
 
 ### Get candidates with both keyword and column filter
 GET {{host}}/v1/api/Candidates?Keyword=Nguyen&ColumnFilters[0].Column=HiringPosition&ColumnFilters[0].Value=Developer&ColumnFilters[0].DataType=0&ColumnFilters[0].FilterType=0
+
+### Delete multiple candidates
+POST {{host}}/v1/api/Candidates/delete
+Content-Type: application/json
+
+[
+  "be533dc3-3dde-4389-b1bb-b6e0e7b68614",
+  "ce533dc3-3dde-4389-b1bb-b6e0e7b68615"
+]
+
+### Delete single candidate
+POST {{host}}/v1/api/Candidates/delete
+Content-Type: application/json
+
+[
+  "{{id}}"
+]
+

@@ -263,3 +263,5 @@ begin
     );
 end //
 delimiter ;
+
+delete from candidate where candidate_id = '000990' or candidate_id = '1212121';

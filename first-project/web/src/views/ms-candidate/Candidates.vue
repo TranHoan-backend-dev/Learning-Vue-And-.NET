@@ -31,8 +31,16 @@ const selectedCandidateIds = ref<string[]>([]);
 const isLoading = ref(false);
 const isSlowLoading = ref(false);
 
+const searchKeyword = ref("");
 const filteredData = ref<any[]>([]);
 const totalRecordsServer = ref(0);
+
+// <editor-fold> desc="Search"
+watch(searchKeyword, () => {
+  currentPage.value = 1;
+  fetchCandidates();
+});
+// </editor-fold>
 
 // Khởi tạo pagination trước khi dùng trong fetch
 // Khởi tạo các biến cơ bản từ pagination
@@ -112,7 +120,7 @@ const fetchCandidates = async () => {
       pageIndex: currentPage.value - 1, // Chuyển từ 1-indexed sang 0-indexed cho Backend
       pageSize: pageSize.value
     };
-    const response = await candidateService.getPaginated(pageable, {keyword: ""});
+    const response = await candidateService.getPaginated(pageable, {keyword: searchKeyword.value});
     if (response && response.data) {
       console.log(response.data)
       // Sửa lỗi mapping: gán candidateId vào id để đồng bộ logic toàn app
@@ -264,25 +272,35 @@ const handleOpenDeleteModal = (id: string) => {
   isModalOpen.value = true
 }
 
-const confirmDeleting = () => {
-  console.log('confirm deleting');
-  let title = 'Xóa thành công';
-  let message = 'Xóa ứng viên thành công';
+const confirmDeleting = async () => {
+  try {
+    isLoading.value = true;
+    let idsToDelete: string[] = [];
+    let message = '';
 
-  if (currentCandidate.value) {
-    message = `Xóa ứng viên ${currentCandidate.value.name} thành công`;
-    filteredData.value = filteredData.value.filter(c => c.id !== currentCandidate.value.id)
-  } else if (selectedCandidateIds.value.length > 0) {
-    message = `Xóa ${selectedCandidateIds.value.length} ứng viên thành công`;
-    filteredData.value = filteredData.value.filter(
-        c => !selectedCandidateIds.value.includes(c.id)
-    )
-    selectedCandidateIds.value = []
+    if (currentCandidate.value) {
+      idsToDelete = [currentCandidate.value.id];
+      message = `Xóa ứng viên ${currentCandidate.value.name} thành công`;
+    } else if (selectedCandidateIds.value.length > 0) {
+      idsToDelete = [...selectedCandidateIds.value];
+      message = `Xóa ${selectedCandidateIds.value.length} ứng viên thành công`;
+    }
+
+    if (idsToDelete.length > 0) {
+      await candidateService.deleteCandidates(idsToDelete);
+      toast.success('Thành công', message);
+      selectedCandidateIds.value = [];
+      await fetchCandidates();
+    }
+
+    isModalOpen.value = false;
+  } catch (error) {
+    console.error("Lỗi khi xóa ứng viên:", error);
+    toast.error("Lỗi", "Không thể xóa ứng viên");
+  } finally {
+    isLoading.value = false;
+    currentCandidate.value = null;
   }
-
-  toast.success(title, message)
-  currentCandidate.value = null;
-  isModalOpen.value = false
 }
 // </editor-fold>
 </script>
@@ -331,7 +349,7 @@ const confirmDeleting = () => {
           <div class="content_body_header_right">
             <div class="content_body_header_right_search">
               <div class="content_body_header_right_search_icon"></div>
-              <SearchField placeholder="ứng viên..." :width="300"/>
+              <SearchField v-model="searchKeyword" placeholder="ứng viên..." :width="300"/>
             </div>
             <div
                 class="content_body_header_right_icon"

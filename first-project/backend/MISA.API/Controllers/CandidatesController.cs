@@ -47,17 +47,14 @@ public class CandidatesController(
     {
         log.LogInformation($"{LogPrefix} Get Candidates with pageable: {pageable}, request: {request}");
         var res = await baseBl.GetAllAsync(pageable, request);
-        return Ok(new
-        {
-            Data = res,
-            Pageable = new Pageable()
-            {
-                PageIndex = pageable.PageIndex,
-                PageSize = pageable.PageSize,
-                TotalElements = baseBl.CountTotalElements().Result
-            }
-        });
+        return Ok(res);
     }
-    
-    
+
+    [HttpPost("delete")]
+    public async Task<IActionResult> DeleteCandidates([FromBody] List<string> ids)
+    {
+        log.LogInformation($"{LogPrefix} Delete Candidates with {ids.Count} ids");
+        await baseBl.DeleteAsync(ids);
+        return Ok();
+    }
 }

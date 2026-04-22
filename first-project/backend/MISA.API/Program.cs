@@ -21,6 +21,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
+
 builder.Services.AddScoped(typeof(IBaseBl<>), typeof(BaseBl<>));
 builder.Services.AddScoped(typeof(IBaseDl<>), typeof(BaseDl<>));
 builder.Services.AddScoped<DbContext>();

@@ -80,6 +80,15 @@ const candidateService = {
     },
     
     /**
+     * Xóa danh sách ứng viên
+     * @param ids Danh sách ID của các ứng viên cần xóa
+     * @returns Promise kết quả từ server
+     */
+    deleteCandidates(ids: string[]) {
+        return api.post('/Candidates/delete', ids);
+    },
+
+    /**
      * Có thể thêm các helper method khác ở đây
      */
 };

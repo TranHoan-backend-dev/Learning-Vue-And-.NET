@@ -41,4 +41,8 @@ public class Candidate : BaseModel
     [ConfigColumn("status")]
     [ConfigSearchableColumn]
     public bool Status { get; set; }
+
+    public Candidate()
+    {
+    }
 }
