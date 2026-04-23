@@ -20,7 +20,9 @@ watch(() => props.modelValue, (val) => {
     form.value = {
       ...form.value,
       ...val,
-      candidateId: val.candidateId || val.id || ''
+      candidateId: val.candidateId || val.id || '',
+      hiringAt: val.hiringAt ? val.hiringAt.split('T')[0] : '',
+      startDate: val.startDate ? val.startDate.split('T')[0] : '',
     };
   } else {
     // Reset form

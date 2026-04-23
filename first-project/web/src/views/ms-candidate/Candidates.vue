@@ -72,6 +72,23 @@ const pageInfo = computed(() => {
 
 
 // Cập nhật lại tableData để dùng filteredData trực tiếp từ Server
+/**
+ * Hàm định dạng ngày tháng sang dd/MM/yyyy
+ */
+const formatDate = (dateStr: string | null | undefined) => {
+  if (!dateStr) return "--";
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}/${month}/${year}`;
+  } catch (e) {
+    return dateStr;
+  }
+};
+
 const tableData = computed<BodyProps[][]>(() => {
   // Chỉ hiển thị Skeleton nếu thời gian tải dữ liệu vượt quá 1 giây
   if (isSlowLoading.value) {
@@ -92,7 +109,7 @@ const tableData = computed<BodyProps[][]>(() => {
         {tdClassName: 'col_email text_left', value: candidate.hiringCampaign || "--"},
         {tdClassName: 'col_email text_left', value: candidate.hiringPosition || "--"},
         {tdClassName: 'col_email text_left', value: "--"},
-        {tdClassName: 'col_date text_center', value: candidate.hiringAt || "--"},
+        {tdClassName: 'col_date text_center', value: formatDate(candidate.hiringAt)},
         {tdClassName: 'col_email text_left', value: candidate.hiringRound || "--"},
         {tdClassName: 'col_email text_center', slotName: 'star'},
         {tdClassName: '', slotName: 'action', id: candidate.id, candidate: candidate}
