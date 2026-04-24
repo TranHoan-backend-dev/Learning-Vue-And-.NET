@@ -27,6 +27,7 @@ export const form = ref({
     jobPosition: '',
     jobDescription: '',
     review: '',
+    avatar: '',
 });
 
 export const error = ref({

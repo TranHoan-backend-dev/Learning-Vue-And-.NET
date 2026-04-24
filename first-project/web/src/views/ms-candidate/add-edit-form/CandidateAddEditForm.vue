@@ -16,6 +16,10 @@ const props = defineProps<{
 const emit = defineEmits(['update:modelValue', 'save', 'cancel']);
 
 const nameInputRef = ref<any>(null);
+const fileInputRef = ref<HTMLInputElement | null>(null);
+const avatarInputRef = ref<HTMLInputElement | null>(null);
+const selectedFileName = ref<string>('');
+const isDragging = ref(false);
 
 onMounted(() => {
   setTimeout(() => {
@@ -32,6 +36,11 @@ watch(() => props.modelValue, (val) => {
       hiringAt: val.hiringAt ? val.hiringAt.split('T')[0] : '',
       startDate: val.startDate ? val.startDate.split('T')[0] : '',
     };
+    // Load avatar from localStorage
+    const savedAvatar = localStorage.getItem(`candidate_avatar_${form.value.candidateId}`);
+    if (savedAvatar) {
+      form.value.avatar = savedAvatar;
+    }
   } else {
     // Reset form
     form.value = {
@@ -62,6 +71,7 @@ watch(() => props.modelValue, (val) => {
       jobDescription: '',
       review: '',
     };
+    selectedFileName.value = '';
   }
 
   // Also reset errors
@@ -92,6 +102,10 @@ const save = () => {
     };
     if (form.value.candidateId) {
       payload.candidateId = form.value.candidateId;
+      // Save avatar to localStorage if it exists
+      if (form.value.avatar) {
+        localStorage.setItem(`candidate_avatar_${form.value.candidateId}`, form.value.avatar);
+      }
     }
     emit('save', payload);
     console.log('Filtered payload:', payload);
@@ -304,18 +318,112 @@ watch(() => form.value.dob, (val) => {
     error.value.dob = '';
   }
 });
+
+const triggerFileInput = () => {
+  console.log('Triggering file input click');
+  fileInputRef.value?.click();
+};
+
+const onFileChange = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  handleFiles(target.files);
+};
+
+const handleFiles = (files: FileList | null) => {
+  if (files && files.length > 0) {
+    const file = files[0];
+    selectedFileName.value = file.name;
+    // form.value.cvFile = file;
+    console.log('Selected file:', file);
+  }
+};
+
+const onDragOver = (event: DragEvent) => {
+  event.preventDefault();
+  isDragging.value = true;
+};
+
+const onDragLeave = () => {
+  isDragging.value = false;
+};
+
+const onDrop = (event: DragEvent) => {
+  event.preventDefault();
+  isDragging.value = false;
+  handleFiles(event.dataTransfer?.files || null);
+};
+
+const removeFile = (event: Event) => {
+  event.stopPropagation();
+  selectedFileName.value = '';
+  if (fileInputRef.value) {
+    fileInputRef.value.value = '';
+  }
+};
+
+const triggerAvatarInput = () => {
+  avatarInputRef.value?.click();
+};
+
+const onAvatarChange = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  if (target.files && target.files.length > 0) {
+    const file = target.files[0];
+    
+    // Validate size (2MB = 2 * 1024 * 1024 bytes)
+    if (file.size > 2 * 1024 * 1024) {
+      alert('Kích thước ảnh không được vượt quá 2MB');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const base64String = e.target?.result as string;
+      form.value.avatar = base64String;
+      
+      // If we already have an ID (edit mode), save immediately to be sure
+      if (form.value.candidateId) {
+        localStorage.setItem(`candidate_avatar_${form.value.candidateId}`, base64String);
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+};
 </script>
 
 <template>
   <div class="modal__body">
     <!-- Upload CV -->
     <div class="upload__container">
-      <div class="upload__box">
+      <div 
+        class="upload__box" 
+        :class="{ 'has-file': selectedFileName, 'is-dragging': isDragging }"
+        @click="triggerFileInput"
+        @dragover="onDragOver"
+        @dragleave="onDragLeave"
+        @drop="onDrop"
+      >
+        <input 
+          type="file" 
+          ref="fileInputRef" 
+          style="display: none" 
+          accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+          @change="onFileChange"
+        />
         <div class="upload__icon">
-          <i class="bi bi-cloud-arrow-up"></i>
+          <i class="bi bi-cloud-arrow-up" v-if="!selectedFileName"></i>
+          <i class="bi bi-file-earmark-pdf" v-else></i>
         </div>
-        <p class="upload__text">Kéo thả hoặc bấm vào đây để tải CV lên</p>
-        <p class="upload__hint">Chấp nhận file .doc, .docx, .pdf, .jpg, .jpeg, .png (Dung lượng &lt; hơn 15 Mb)</p>
+        <div v-if="!selectedFileName">
+          <p class="upload__text">Kéo thả hoặc bấm vào đây để tải CV lên</p>
+          <p class="upload__hint">Chấp nhận file .doc, .docx, .pdf, .jpg, .jpeg, .png (Dung lượng &lt; hơn 15 Mb)</p>
+        </div>
+        <div v-else class="selected-file">
+          <p class="file-name">{{ selectedFileName }}</p>
+          <button type="button" class="btn-remove" @click="removeFile">
+            <i class="bi bi-x-circle-fill"></i>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -323,8 +431,16 @@ watch(() => form.value.dob, (val) => {
     <form @submit.prevent="save">
       <div class="form__container">
         <div class="form__left">
-          <div class="avatar__upload">
-            <div class="avatar__placeholder">Ảnh</div>
+          <div class="avatar__upload" @click="triggerAvatarInput">
+            <input 
+              type="file" 
+              ref="avatarInputRef" 
+              style="display: none" 
+              accept="image/*"
+              @change="onAvatarChange"
+            />
+            <div v-if="!form.avatar" class="avatar__placeholder">Ảnh</div>
+            <img v-else :src="form.avatar" class="avatar__image" alt="Avatar" />
           </div>
         </div>
 

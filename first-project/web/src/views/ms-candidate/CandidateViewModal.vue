@@ -16,6 +16,14 @@ const avatarText = computed(() => {
 
 const tabs = ['Hồ sơ ứng viên', 'Email', 'Tin nhắn', 'Đánh giá', 'Bình luận', 'Tài liệu', 'Công việc', 'Lịch sử'];
 const subTabs = ['CV ứng viên', 'Thông tin ứng tuyển', 'Thông tin tiếp nhận'];
+
+const avatarUrl = computed(() => {
+  const id = props.candidate?.candidateId || props.candidate?.id;
+  if (id) {
+    return localStorage.getItem(`candidate_avatar_${id}`);
+  }
+  return null;
+});
 </script>
 
 <template>
@@ -23,7 +31,10 @@ const subTabs = ['CV ứng viên', 'Thông tin ứng tuyển', 'Thông tin tiế
     <!-- Sidebar trái -->
     <div class="detail_sidebar">
       <div class="detail_sidebar_header">
-        <div class="detail_sidebar_avatar">{{ avatarText }}</div>
+        <div class="detail_sidebar_avatar">
+          <img v-if="avatarUrl" :src="avatarUrl" class="sidebar_avatar_img" alt="Avatar" />
+          <span v-else>{{ avatarText }}</span>
+        </div>
         <div class="detail_sidebar_info_top">
           <div class="detail_sidebar_name_row">
             <span class="detail_sidebar_name">{{ candidate?.name }}</span>
@@ -171,6 +182,13 @@ const subTabs = ['CV ứng viên', 'Thông tin ứng tuyển', 'Thông tin tiế
     justify-content: center;
     font-size: 18px;
     font-weight: 700;
+    overflow: hidden;
+}
+
+.sidebar_avatar_img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .detail_sidebar_info_top {
