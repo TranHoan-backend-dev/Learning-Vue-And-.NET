@@ -18,15 +18,9 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> log) : IExce
             AlreadyExistsException => (AppEnum.StatusCode.BadRequest, exception.Message),
             NotFoundException => (AppEnum.StatusCode.NotFound, exception.Message),
             UnauthorizedAccessException => (AppEnum.StatusCode.Unauthorized, exception.Message),
-            // System.Data.DataException => (AppEnum.StatusCode.InternalServerError, "Database error: " + exception.Message),
             _ => (AppEnum.StatusCode.InternalServerError, exception.Message)
         };
 
-        // var response = new
-        // {
-        //     Status = status,
-        //     Message = message
-        // };
         var response = new ErrorResult()
         {
             DevMsg = message,

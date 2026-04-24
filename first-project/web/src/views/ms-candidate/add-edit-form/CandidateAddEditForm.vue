@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {watch} from 'vue';
+import {onMounted, ref, watch} from 'vue';
 import NormalInput from "@/components/ui/ms-input/NormalInput.vue";
 import {validateEmail, validateFullName, validatePhone} from "@/utils/validation.ts"
 import {error, form} from "@/views/ms-candidate/add-edit-form/declaration.ts";
@@ -14,6 +14,14 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits(['update:modelValue', 'save', 'cancel']);
+
+const nameInputRef = ref<any>(null);
+
+onMounted(() => {
+  setTimeout(() => {
+    nameInputRef.value?.focus();
+  }, 100); // Delay for modal animation
+});
 
 watch(() => props.modelValue, (val) => {
   if (val) {
@@ -137,7 +145,7 @@ const validateAll = () => {
     }
   }
 
-  // Validate other required fields
+  // <editor-fold> desc="Validate other required fields"
   error.value.hiringCampaign = !form.value.hiringCampaign ? 'Chiến dịch không được để trống' : '';
   if (error.value.hiringCampaign) isValid = false;
 
@@ -173,6 +181,7 @@ const validateAll = () => {
       isValid = false;
     }
   }
+  // </editor-fold>
 
   // Validate DOB (18+)
   if (form.value.dob) {
@@ -324,6 +333,7 @@ watch(() => form.value.dob, (val) => {
           <div class="form__row">
             <label>Họ và tên <span class="required">*</span></label>
             <NormalInput
+                ref="nameInputRef"
                 type="text"
                 v-model="form.name"
                 placeholder="Nhập họ và tên"

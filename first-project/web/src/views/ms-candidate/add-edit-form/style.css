@@ -48,7 +48,7 @@
     gap: 4px;
 }
 
-.upload__box:hover {
+.upload__box:hover, .upload__box.is-dragging {
     background-color: #e8f0fe;
     border-color: #2159c4;
 }
@@ -70,6 +70,50 @@
     color: #65696e;
     font-size: 12px;
     margin: 0;
+}
+
+.upload__box.has-file {
+    background-color: #fff;
+    border-style: solid;
+    flex-direction: row;
+    align-items: center;
+    padding: 12px 20px;
+    gap: 12px;
+}
+
+.selected-file {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-grow: 1;
+}
+
+.file-name {
+    margin: 0;
+    font-size: 14px;
+    color: #11181c;
+    font-weight: 500;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 400px;
+}
+
+.btn-remove {
+    background: none;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    color: #f31260;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    transition: transform 0.2s;
+}
+
+.btn-remove:hover {
+    transform: scale(1.1);
 }
 
 /* Form Groups */

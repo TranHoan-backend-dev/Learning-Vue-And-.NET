@@ -16,7 +16,8 @@ interface SelectProps {
   errorMessage?: string,
   placeholder?: string,
   size?: SelectSize,
-  hideErrorSpace?: boolean
+  hideErrorSpace?: boolean,
+  disabled?: boolean
 }
 
 const props = withDefaults(defineProps<SelectProps>(), {
@@ -40,6 +41,7 @@ const selectedLabel = computed(() => {
 });
 
 const toggleDropdown = async () => {
+  if (props.disabled) return;
   if (!isOpen.value) {
     calculatePlacement();
   }
@@ -93,7 +95,7 @@ onUnmounted(() => {
     <div class="ms-select-wrapper">
       <div 
         class="ms-select-trigger" 
-        :class="{ 'opened': isOpen, 'error': errorMessage }"
+        :class="{ 'opened': isOpen, 'error': errorMessage, 'disabled': disabled }"
         @click="toggleDropdown"
       >
         <span class="selected-value" :class="{ 'is-placeholder': !modelValue }">
@@ -181,6 +183,17 @@ onUnmounted(() => {
 
 .ms-select-trigger.opened {
   background-color: #e4e4e7;
+}
+
+.ms-select-trigger.disabled {
+  background-color: #ebecef;
+  cursor: not-allowed;
+  border-color: transparent;
+}
+
+.ms-select-trigger.disabled .selected-value,
+.ms-select-trigger.disabled .chevron-icon {
+  color: #a1a1aa;
 }
 
 .ms-select-trigger.error {

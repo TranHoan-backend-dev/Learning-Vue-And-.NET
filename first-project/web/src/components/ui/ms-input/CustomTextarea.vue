@@ -4,6 +4,7 @@ interface TextareaProps {
   placeholder?: string,
   errorMessage?: string,
   hideErrorSpace?: boolean,
+  disabled?: boolean,
 }
 
 const props = withDefaults(defineProps<TextareaProps>(), {
@@ -23,6 +24,7 @@ const emit = defineEmits<{
         @input="emit('update:modelValue', ($event.target as HTMLInputElement).value)"
         :value="modelValue"
         :placeholder="placeholder"
+        :disabled="disabled"
     ></textarea>
     <div 
       v-if="!hideErrorSpace || errorMessage" 
@@ -63,6 +65,13 @@ const emit = defineEmits<{
 .ms-textarea:focus {
   background-color: #fff;
   border-color: #0070f3;
+}
+
+.ms-textarea:disabled {
+  background-color: #ebecef;
+  color: #a1a1aa;
+  cursor: not-allowed;
+  border-color: transparent;
 }
 
 .ms-textarea.error {

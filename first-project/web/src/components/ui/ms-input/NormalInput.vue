@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 
 const props = defineProps<{
   label?: string,
@@ -8,10 +9,21 @@ const props = defineProps<{
   appendInnerIcon?: string,
   errorMessage?: string,
   hideErrorSpace?: boolean,
+  disabled?: boolean,
 }>()
 
 const value = defineModel<string>({
   default: ''
+})
+
+const inputRef = ref<HTMLInputElement | null>(null);
+
+const focus = () => {
+  inputRef.value?.focus();
+}
+
+defineExpose({
+  focus
 })
 </script>
 
@@ -19,12 +31,14 @@ const value = defineModel<string>({
   <div class="ms-input-container" :class="props.className">
     <div class="ms_input_wrapper">
       <input
+          ref="inputRef"
           :type="props.type ?? 'text'"
           :placeholder="props.placeholder"
           v-model="value"
           class="ms_input"
           :class="{'ms-input-error': props.errorMessage}"
           :aria-label="props.label"
+          :disabled="props.disabled"
       />
       <div v-if="props.appendInnerIcon" class="ms_input_icon">
         <i :class="props.appendInnerIcon.startsWith('mdi-') ? 'mdi ' + props.appendInnerIcon : props.appendInnerIcon"></i>
@@ -74,6 +88,13 @@ const value = defineModel<string>({
 .ms_input:focus {
   background-color: #fff;
   border-color: #0070f3;
+}
+
+.ms_input:disabled {
+  background-color: #ebecef;
+  color: #a1a1aa;
+  cursor: not-allowed;
+  border-color: transparent;
 }
 
 .ms-input-error {

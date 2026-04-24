@@ -7,6 +7,7 @@ defineProps<{
   className?: string,
   errorMessage?: string,
   hideErrorSpace?: boolean,
+  disabled?: boolean,
 }>()
 </script>
 
@@ -17,6 +18,7 @@ defineProps<{
       append-inner-icon="mdi-calendar-month-outline"
       :error-message="errorMessage"
       :hide-error-space="hideErrorSpace"
+      :disabled="disabled"
       placeholder="dd/MM/yyyy"
       :class-name="className"
   />

@@ -180,9 +180,10 @@ const fetchCandidates = async () => {
       }));
       totalRecordsServer.value = response.data.pageable?.totalElements || 0;
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Lỗi khi lấy danh sách ứng viên:", error);
-    toast.error("Lỗi", "Không thể lấy dữ liệu từ máy chủ");
+    const userMsg = error.response?.data?.userMsg || "Không thể lấy dữ liệu từ máy chủ";
+    toast.error("Lỗi", userMsg);
   } finally {
     isLoading.value = false;
     isSlowLoading.value = false;
@@ -224,9 +225,10 @@ const handleSaveCandidate = async (data: Candidate, mode: 'add' | 'edit') => {
     isModalOpen.value = false;
     // Load lại dữ liệu sau khi lưu thành công
     await fetchCandidates();
-  } catch (error) {
+  } catch (error: any) {
     console.error("Lỗi khi lưu ứng viên:", error);
-    toast.error("Lỗi", "Không thể lưu thông tin ứng viên");
+    const userMsg = error.response?.data?.userMsg || "Không thể lưu thông tin ứng viên";
+    toast.error("Lỗi", userMsg);
   } finally {
     isLoading.value = false;
   }
@@ -343,9 +345,10 @@ const confirmDeleting = async () => {
     }
 
     isModalOpen.value = false;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Lỗi khi xóa ứng viên:", error);
-    toast.error("Lỗi", "Không thể xóa ứng viên");
+    const userMsg = error.response?.data?.userMsg || "Không thể xóa ứng viên";
+    toast.error("Lỗi", userMsg);
   } finally {
     isLoading.value = false;
     currentCandidate.value = null;
